@@ -17,7 +17,8 @@ class MyApp extends StatelessWidget {
         title: 'Namer App',
         theme: ThemeData(
           useMaterial3: true,
-          colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepOrange),
+          colorScheme: ColorScheme.fromSeed(
+              seedColor: const Color.fromARGB(255, 29, 20, 127)),
         ),
         home: MyHomePage(),
       ),
@@ -86,6 +87,10 @@ class _MyHomePageState extends State<MyHomePage> {
         //page = Placeholder(); //pantalla por defecto
         page = FavoritesPage();
         break;
+      case 2:
+        //page = Placeholder(); //pantalla por defecto
+        page = UserPage();
+        break;
       default: //para que no salga nada de error si no se pulsa uno de los otros
         throw UnimplementedError('no widget for $selectedIndex');
     }
@@ -102,6 +107,7 @@ class _MyHomePageState extends State<MyHomePage> {
 
     return Scaffold(
       body: LayoutBuilder(
+        //widgets que dependen del tamaño de la pantalla
         builder: (context, constraints) {
           if (constraints.maxWidth < 450) {
             //se ven solo iconos
@@ -114,12 +120,16 @@ class _MyHomePageState extends State<MyHomePage> {
                   child: BottomNavigationBar(
                     items: [
                       BottomNavigationBarItem(
-                        icon: Icon(Icons.home),
+                        icon: Icon(Icons.home_rounded),
                         label: 'Home',
                       ),
                       BottomNavigationBarItem(
-                        icon: Icon(Icons.favorite),
-                        label: 'Favorites',
+                        icon: Icon(Icons.stacked_bar_chart),
+                        label: 'Statics',
+                      ),
+                      BottomNavigationBarItem(
+                        icon: Icon(Icons.person_rounded),
+                        label: 'User',
                       ),
                     ],
                     currentIndex: selectedIndex, //home
@@ -144,12 +154,16 @@ class _MyHomePageState extends State<MyHomePage> {
                         600, //se ven las palabras e iconos
                     destinations: [
                       NavigationRailDestination(
-                        icon: Icon(Icons.home),
+                        icon: Icon(Icons.home_rounded),
                         label: Text('Home'),
                       ),
                       NavigationRailDestination(
-                        icon: Icon(Icons.favorite),
-                        label: Text('Favorites'),
+                        icon: Icon(Icons.stacked_bar_chart),
+                        label: Text('Statics'),
+                      ),
+                      NavigationRailDestination(
+                        icon: Icon(Icons.person_rounded),
+                        label: Text('User'),
                       ),
                     ],
                     selectedIndex: selectedIndex, //home
@@ -167,6 +181,27 @@ class _MyHomePageState extends State<MyHomePage> {
           }
         },
       ),
+      floatingActionButton: Padding(
+        padding: const EdgeInsets.all(25),
+        child: Column(
+          children: [
+            FloatingActionButton(
+              onPressed: () {
+                // Redirige a la página ChatPage usando Navigator
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => ChatPage()),
+                );
+              },
+              backgroundColor: Colors.cyan.shade600,
+              foregroundColor: colorScheme.onPrimary,
+              shape: const CircleBorder(),
+              tooltip: 'Chat with me!',
+              child: const Icon(Icons.sms_outlined),
+            ),
+          ],
+        ),
+      ),
     );
   }
 }
@@ -174,6 +209,7 @@ class _MyHomePageState extends State<MyHomePage> {
 class GeneratorPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     var appState = context.watch<MyAppState>();
     var pair = appState.current; //pares palabras
 
@@ -184,47 +220,7 @@ class GeneratorPage extends StatelessWidget {
     } else {
       icon = Icons.favorite_border;
     }
-
-    return Center(
-      //Centrar columna al medio
-      child: Column(
-        mainAxisAlignment:
-            MainAxisAlignment.center, //centrar texto al medio en horizontal
-        children: [
-          Expanded(
-            //widget expandido
-            flex: 3, //espacio entre botones y arriba
-            child: HistoryListView(), //historial de palabras
-          ),
-          SizedBox(height: 10), //crea espacio visual
-          BigCard(pair: pair), //pares palabras en minisculas
-          SizedBox(height: 10), //crea espacio visual
-          Row(
-            //Equivalente horizontal de colum
-            mainAxisSize: MainAxisSize.min, //centrar texto al medio en vertical
-            children: [
-              ElevatedButton.icon(
-                onPressed: () {
-                  appState.toggleFavorite();
-                },
-                icon: Icon(icon),
-                label: Text('Like'),
-              ),
-
-              SizedBox(width: 10), //crea espacio visual
-
-              ElevatedButton(
-                onPressed: () {
-                  appState.getNext();
-                },
-                child: Text('Next'),
-              ),
-            ],
-          ),
-          Spacer(flex: 2) //espacio entre botones y abajo
-        ],
-      ),
-    );
+    return Center();
   }
 }
 
@@ -387,6 +383,76 @@ class _HistoryListViewState extends State<HistoryListView> {
           );
         },
       ),
+    );
+  }
+}
+
+class ChatPage extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    var theme = Theme.of(context);
+    var appState = context.watch<MyAppState>();
+
+    return Scaffold(
+      appBar: AppBar(
+        title: Text('Chat'),
+      ),
+      body: Center(
+        child: Text('¡Bienvenido al chat!'),
+      ),
+    );
+  }
+}
+
+class UserPage extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    var theme = Theme.of(context);
+    var appState = context.watch<MyAppState>();
+    var favorites = appState.favorites; //lista favoritos
+
+    if (favorites.isEmpty) {
+      return Center(
+        child: Text('No favorites yet.'),
+      );
+    }
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Padding(
+          padding: const EdgeInsets.all(30),
+          child: Text('You have '
+              '${appState.favorites.length} favorites:'),
+        ),
+        Expanded(
+          // Make better use of wide windows with a grid.
+          child: GridView(
+            gridDelegate: SliverGridDelegateWithMaxCrossAxisExtent(
+              maxCrossAxisExtent: 400,
+              childAspectRatio: 400 / 80,
+            ),
+            children: [
+              for (var pair in appState.favorites)
+                ListTile(
+                  leading: IconButton(
+                    icon: Icon(Icons.delete_outline,
+                        semanticLabel: 'Delete'), //para icono
+                    color: theme.colorScheme.primary,
+                    onPressed: () {
+                      appState.removeFavorite(pair);
+                    },
+                  ),
+                  title: Text(
+                    //para texto
+                    pair.asLowerCase,
+                    semanticsLabel: pair.asPascalCase,
+                  ),
+                ),
+            ],
+          ),
+        ),
+      ],
     );
   }
 }

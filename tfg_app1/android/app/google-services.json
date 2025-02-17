@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "6185576845",
+    "project_id": "tfgapp-uni",
+    "storage_bucket": "tfgapp-uni.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:6185576845:android:355312b12deca5e64575c4",
+        "android_client_info": {
+          "package_name": "com.example.tfg_app1"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBE0GJZ1ET22SeknwIsz4CF1eDq4mJjjGA"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

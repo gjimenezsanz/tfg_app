@@ -1,8 +1,26 @@
 import 'package:english_words/english_words.dart';
+import 'package:firebase_core/firebase_core.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:firebase_core/firebase_core.dart';
+import 'firebase_options.dart';
 
-void main() {
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  if (kIsWeb) {
+    await Firebase.initializeApp(
+        options: FirebaseOptions(
+            apiKey: "AIzaSyAQjZJnY-Gv0MrAXH9fBClyeOI5CsZfZTo",
+            authDomain: "fir-flutter-ac78a.firebaseapp.com",
+            projectId: "fir-flutter-ac78a",
+            storageBucket: "fir-flutter-ac78a.firebasestorage.app",
+            messagingSenderId: "385148574959",
+            appId: "1:385148574959:web:51e262871cd0db658a8f1a"));
+  } else {
+    await Firebase.initializeApp();
+  }
+
   runApp(MyApp());
 }
 

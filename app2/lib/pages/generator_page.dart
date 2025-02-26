@@ -16,12 +16,12 @@ class GeneratorPage extends StatelessWidget {
             children: [
               _buildHeader(),
               SizedBox(height: 20),
-              _buildMoodTracker(),
+              MoodTracker(),
               SizedBox(height: 20),
               _CarouselCard(),
               //_buildRecommendationCards(),
               SizedBox(height: 60),
-              _buildWeeklySurveyCard(context),
+              _cuestionarioSemanal(context),
             ],
           ),
         ),
@@ -38,7 +38,7 @@ Widget _buildHeader() {
       Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text("Bienvenido, Usuario!",
+          Text("¡Hola de nuevo!",
               style: TextStyle(
                   fontSize: 22,
                   color: Colors.white,
@@ -46,7 +46,7 @@ Widget _buildHeader() {
           SizedBox(width: 10),
           CircleAvatar(
             radius: 25,
-            backgroundImage: AssetImage('assets/user_avatar.png'),
+            backgroundImage: AssetImage('assets/users/user_avatar.png'),
           ),
         ],
       ),
@@ -54,25 +54,95 @@ Widget _buildHeader() {
   );
 }
 
-Widget _buildMoodTracker() {
-  return Column(
-    crossAxisAlignment: CrossAxisAlignment.start,
-    children: [
-      Text("¿Cómo te sientes hoy?",
-          style: TextStyle(fontSize: 18, color: Colors.white)),
-      SizedBox(height: 10),
-      Row(
-        mainAxisAlignment: MainAxisAlignment.spaceAround,
-        children: [
-          _buildMoodIcon(Icons.sentiment_very_satisfied, "Feliz"),
-          _buildMoodIcon(Icons.sentiment_neutral, "Normal"),
-          _buildMoodIcon(Icons.sentiment_dissatisfied, "Triste"),
-        ],
-      )
-    ],
-  );
+class MoodTracker extends StatefulWidget {
+  @override
+  _MoodTrackerState createState() => _MoodTrackerState();
 }
 
+class _MoodTrackerState extends State<MoodTracker> {
+  double moodLevel = 0.7; // Nivel inicial (0.0 - Bajo, 1.0 - Alto)
+  final double barWidth = 300; // Ancho de la barra
+
+  @override
+  Widget build(BuildContext context) {
+    MoodStatus moodStatus = _getMoodStatus(moodLevel); // Estado de ánimo actual
+    return Column(
+      children: [
+        Text(
+          "Mood Level",
+          style: TextStyle(
+              fontSize: 20, fontWeight: FontWeight.bold, color: Colors.white),
+        ),
+        SizedBox(height: 10),
+        GestureDetector(
+          onHorizontalDragUpdate: (details) {
+            setState(() {
+              // Calcula la nueva posición basándose en el ancho de la barra
+              moodLevel += details.primaryDelta! / barWidth;
+              // Mantiene el valor entre 0.0 y 1.0
+              moodLevel = moodLevel.clamp(0.0, 1.0);
+              print(
+                  "Mood Level actualizado: posición: $moodLevel + mood: ${moodStatus.label}");
+            });
+          },
+          child: Stack(
+            alignment: Alignment.center,
+            children: [
+              // Barra de fondo con gradiente
+              Container(
+                width: barWidth,
+                height: 20,
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(10), //redondear bordes
+                  gradient: LinearGradient(
+                    //colores de la barra
+                    colors: [
+                      Theme.of(context).colorScheme.primary,
+                      Colors.deepPurple.shade200,
+                      Theme.of(context).colorScheme.onPrimary,
+                    ],
+                    stops: [0.0, 0.5, 1.0], //posición de los colores
+                  ),
+                ),
+              ),
+              // Indicador del estado de ánimo (icono que se mueve)
+              Positioned(
+                left:
+                    moodLevel * (barWidth - 24), // Ajuste del icono en la barra
+                child: Icon(moodStatus.icon, color: Colors.black, size: 24),
+              ),
+            ],
+          ),
+        ),
+        SizedBox(height: 10),
+        Text(
+          "Status: ${moodStatus.label}",
+          style: TextStyle(fontSize: 18, color: Colors.white),
+        ),
+      ],
+    );
+  }
+
+  MoodStatus _getMoodStatus(double level) {
+    if (level < 0.20)
+      return MoodStatus("Bad", Icons.sentiment_very_dissatisfied);
+    if (level < 0.40)
+      return MoodStatus("Stressed", Icons.sentiment_dissatisfied);
+    if (level < 0.55) return MoodStatus("Normal", Icons.sentiment_neutral);
+    if (level < 0.70) return MoodStatus("Good", Icons.sentiment_satisfied);
+    if (level < 0.85)
+      return MoodStatus("Very Good", Icons.sentiment_very_satisfied);
+    return MoodStatus("Excellent", Icons.emoji_emotions);
+  }
+}
+
+class MoodStatus {
+  final String label;
+  final IconData icon;
+
+  MoodStatus(this.label, this.icon);
+}
+/*
 Widget _buildMoodIcon(IconData icon, String mood) {
   return Column(
     children: [
@@ -81,7 +151,7 @@ Widget _buildMoodIcon(IconData icon, String mood) {
       Text(mood, style: TextStyle(color: Colors.white)),
     ],
   );
-}
+}*/
 
 //-----------------CarouselCard-----------------
 
@@ -133,12 +203,13 @@ Widget _CarouselCard() {
 }
 
 enum CardInfo {
-  camera('Relax', Icons.video_call, 'assets/images/image1.jpg'),
+  camera('Relax', Icons.self_improvement_rounded, 'assets/images/image1.jpg'),
   lighting('Focus', Icons.lightbulb, 'assets/images/image2.jpg'),
-  climate('Sleep', Icons.thermostat, 'assets/images/image3.jpg'),
-  wifi('Feel Good', Icons.wifi, 'assets/images/image4.jpg'),
-  media('Media', Icons.library_music, 'assets/images/image5.jpg'),
-  more('', Icons.add, 'assets/images/image6.jpg');
+  climate('Sleep', Icons.nightlight_round_outlined, 'assets/images/image3.jpg'),
+  wifi('Feel Good', Icons.sentiment_very_satisfied_rounded,
+      'assets/images/image4.jpg'),
+  //media('Media', Icons.library_music, 'assets/images/image5.jpg'),
+  more('', Icons.add, 'assets/images/image1.jpg');
 
   const CardInfo(this.label, this.icon, this.backgroundImage);
   final String label;
@@ -146,58 +217,7 @@ enum CardInfo {
   final String backgroundImage;
 }
 
-//-------------------------------------
-/*
-Widget _buildRecommendationCards() {
-  return Column(
-    crossAxisAlignment: CrossAxisAlignment.start,
-    children: [
-      Text("Recomendaciones",
-          style: TextStyle(fontSize: 18, color: Colors.white)),
-      SizedBox(height: 10),
-      Row(
-        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-        children: [
-          _buildCategoryCard("Relax", Icons.spa, Colors.blue),
-          _buildCategoryCard("Focus", Icons.center_focus_strong, Colors.purple),
-        ],
-      ),
-      SizedBox(height: 10),
-      Row(
-        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-        children: [
-          _buildCategoryCard("Sleep", Icons.nightlight_round, Colors.green),
-          _buildCategoryCard("Feel Good", Icons.favorite, Colors.red),
-        ],
-      )
-    ],
-  );
-}
-
-
-Widget _buildCategoryCard(String title, IconData icon, Color color) {
-  //StreamBuilder
-  return Container(
-    width: 150,
-    height: 120,
-    decoration: BoxDecoration(
-      color: color.withOpacity(0.7),
-      borderRadius: BorderRadius.circular(15),
-    ),
-    child: Column(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: [
-        Icon(icon, size: 40, color: Colors.white),
-        SizedBox(height: 5),
-        Text(title,
-            style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
-      ],
-    ),
-  );
-}
-*/
-
-Widget _buildWeeklySurveyCard(BuildContext context) {
+Widget _cuestionarioSemanal(BuildContext context) {
   return GestureDetector(
     // Permite detectar gestos en el widget
     onTap: () {
@@ -210,7 +230,7 @@ Widget _buildWeeklySurveyCard(BuildContext context) {
       width: double.infinity,
       padding: EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: Colors.orange.withOpacity(0.8),
+        color: Colors.deepPurple.shade200.withOpacity(0.8),
         borderRadius: BorderRadius.circular(15),
       ),
       child: Column(

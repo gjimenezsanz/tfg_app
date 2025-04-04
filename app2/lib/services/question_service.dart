@@ -1,44 +1,23 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
-import '../models/question_loneliness.dart';
+import 'dart:convert';
+import 'package:flutter/services.dart';
+import '../models/question.dart';
 
 class QuestionService {
-  final FirebaseFirestore _db = FirebaseFirestore.instance;
-
-  Future<List<QuestionLoneliness>> fetchQuestions() async {
+  Future<List<Question>> fetchQuestions() async {
     try {
-      var snapshot = await _db
-          .collection("cuestionarios")
-          .doc("cuestionario_loneliness")
-          .get();
+      // Cargar el JSON desde los assets
+      String jsonString = await rootBundle.loadString('assets/questions.json');
+      Map<String, dynamic> jsonData =
+          json.decode(jsonString); // Decodificar el JSON
 
-      if (!snapshot.exists) {
-        print("❌ No se encontraron preguntas.");
-        return [];
-      }
+      List<Question> questions =
+          (jsonData["preguntas"] as List) // Acceder a la lista de preguntas
+              .map((data) => Question.fromJson(data))
+              .toList();
 
-      var data = snapshot.data();
-      if (data == null || !data.containsKey("preguntas")) {
-        print("❌ Error: El documento no tiene el campo 'preguntas'.");
-        return [];
-      }
-
-      List<dynamic> preguntasData = data["preguntas"];
-
-      if (preguntasData.isEmpty) {
-        print("⚠️ Advertencia: No hay preguntas en la base de datos.");
-        return [];
-      }
-
-      // Transformar los datos en una lista de objetos QuestionLoneliness
-      List<QuestionLoneliness> questions = preguntasData.map((preguntaMap) {
-        return QuestionLoneliness.fromFirestore(
-            preguntaMap as Map<String, dynamic>);
-      }).toList();
-
-      print("📌 Preguntas cargadas correctamente: ${questions.length}");
       return questions;
     } catch (e) {
-      print("❌ Error al obtener preguntas: $e");
+      print("❌ Error al cargar preguntas desde JSON: $e");
       return [];
     }
   }

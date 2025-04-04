@@ -1,8 +1,6 @@
 import "package:app2/main.dart";
 import "package:flutter/material.dart";
 import "package:provider/provider.dart";
-import 'package:provider/provider.dart';
-import 'package:flutter/material.dart';
 import 'package:app2/services/chat_service.dart';
 
 class ChatPage extends StatefulWidget {
@@ -16,11 +14,19 @@ class _ChatPageState extends State<ChatPage> {
   String? _response;
 
   void _sendMessage() async {
-    final response = await _chatService.sendMessage(_controller.text);
+    // Envia el mensaje
     setState(() {
+      _response = "Pensando...";
+    });
+
+    final response = await _chatService.sendMessage(_controller.text);
+
+    setState(() {
+      // Actualiza la respuesta
       _response = response;
     });
-    _controller.clear();
+
+    _controller.clear(); // Limpia el campo de texto
   }
 
   @override
@@ -48,7 +54,8 @@ class _ChatPageState extends State<ChatPage> {
                 ),
                 IconButton(
                   icon: Icon(Icons.send),
-                  onPressed: _sendMessage,
+                  onPressed:
+                      _sendMessage, // Envía el mensaje al presionar el botón
                 ),
               ],
             ),

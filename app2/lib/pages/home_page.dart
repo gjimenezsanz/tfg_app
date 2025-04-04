@@ -1,5 +1,5 @@
 import "package:app2/pages/chat_page.dart";
-import "package:app2/pages/favorites_page.dart";
+import "package:app2/pages/graphics_page.dart";
 import "package:app2/pages/generator_page.dart";
 import "package:app2/pages/user_page.dart";
 import "package:flutter/material.dart";
@@ -23,19 +23,16 @@ class _MyHomePageState extends State<MyHomePage> {
         page = GeneratorPage();
         break;
       case 1:
-        //page = Placeholder(); //pantalla por defecto
-        page = FavoritesPage();
+        page = GraphicPage();
         break;
       case 2:
-        //page = Placeholder(); //pantalla por defecto
         page = UserPage();
         break;
       default: //para que no salga nada de error si no se pulsa uno de los otros
         throw UnimplementedError('no widget for $selectedIndex');
     }
 
-    // The container for the current page, with its background color
-    // and subtle switching animation.
+    //widget que cambia de color dependiendo del tema
     var mainArea = ColoredBox(
       color: colorScheme.surfaceVariant,
       child: AnimatedSwitcher(
@@ -49,9 +46,6 @@ class _MyHomePageState extends State<MyHomePage> {
         //widgets que dependen del tamaño de la pantalla
         builder: (context, constraints) {
           if (constraints.maxWidth < 450) {
-            //se ven solo iconos
-            // Use a more mobile-friendly layout with BottomNavigationBar
-            // on narrow screens.
             return Column(
               children: [
                 Expanded(child: mainArea),
@@ -72,6 +66,8 @@ class _MyHomePageState extends State<MyHomePage> {
                       ),
                     ],
                     backgroundColor: Colors.black,
+                    selectedItemColor: Colors.white,
+                    unselectedItemColor: Colors.grey,
                     selectedIconTheme: IconThemeData(color: Colors.white),
                     unselectedIconTheme: IconThemeData(color: Colors.grey),
                     currentIndex: selectedIndex, //home
@@ -109,6 +105,8 @@ class _MyHomePageState extends State<MyHomePage> {
                       ),
                     ],
                     backgroundColor: Colors.black,
+                    selectedLabelTextStyle: TextStyle(color: Colors.white),
+                    unselectedLabelTextStyle: TextStyle(color: Colors.grey),
                     selectedIconTheme: IconThemeData(color: Colors.black),
                     unselectedIconTheme: IconThemeData(color: Colors.grey),
                     selectedIndex: selectedIndex, //home

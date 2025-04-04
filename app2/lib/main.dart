@@ -7,10 +7,12 @@ import 'package:provider/provider.dart';
 import 'firebase_options.dart'; // Archivo generado por flutterfire configure
 
 void main() async {
-  WidgetsFlutterBinding.ensureInitialized();
+  WidgetsFlutterBinding
+      .ensureInitialized(); // Asegura que los widgets estén inicializados antes de ejecutar el código
   if (kIsWeb) {
     await Firebase.initializeApp(
         options: FirebaseOptions(
+            // Configuración para la web
             apiKey: "AIzaSyAQjZJnY-Gv0MrAXH9fBClyeOI5CsZfZTo",
             authDomain: "fir-flutter-ac78a.firebaseapp.com",
             projectId: "fir-flutter-ac78a",

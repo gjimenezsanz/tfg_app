@@ -13,9 +13,10 @@ class QuestionPage extends StatefulWidget {
 class _QuestionPageState extends State<QuestionPage> {
   int _currentIndex = 0; // Índice de la pregunta actual
   String? _selectedOption; // Opción seleccionada
+
   List<Question> _questions = []; // Lista de preguntas
-  bool _isCompleted = false; // Indica si el cuestionario ha terminado
   int _totalScore = 0; // Puntaje total
+  bool _isCompleted = false; // Indica si el cuestionario ha terminado
 
   @override
   void initState() {
@@ -72,6 +73,7 @@ class _QuestionPageState extends State<QuestionPage> {
 
   void _nextQuestion() {
     // Método para avanzar a la siguiente pregunta
+
     if (_selectedOption != null) {
       _saveResponse(_questions[_currentIndex].pregunta, _selectedOption!);
     }
@@ -157,6 +159,7 @@ class _QuestionPageState extends State<QuestionPage> {
                 children: [
                   BigCard(question: _questions[_currentIndex].pregunta),
                   SizedBox(height: 20),
+
                   // Opciones con botones de radio
                   ..._questions[_currentIndex].opciones.map((opcion) {
                     return ListTile(
@@ -173,6 +176,7 @@ class _QuestionPageState extends State<QuestionPage> {
                       ),
                     );
                   }).toList(),
+
                   SizedBox(height: 20),
                   ElevatedButton(
                     onPressed: _selectedOption != null ? _nextQuestion : null,
@@ -201,6 +205,7 @@ class BigCard extends StatelessWidget {
     return Card(
       //color: Colors.deepPurple.shade200,
       color: Theme.of(context).colorScheme.primary,
+
       child: Padding(
         padding: const EdgeInsets.all(20),
         child: Text(

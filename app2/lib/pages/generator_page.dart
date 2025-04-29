@@ -231,7 +231,7 @@ Widget _cuestionarioSemanal(BuildContext context) {
       ),
       child: Column(
         children: [
-          Text("Cuestionario semanal",
+          Text("Weekly Questionnaire",
               style: TextStyle(
                   color: Colors.white,
                   fontWeight: FontWeight.bold,

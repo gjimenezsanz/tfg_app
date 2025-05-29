@@ -16,7 +16,9 @@ class _QuestionPageState extends State<QuestionPage> {
   String? _selectedOption; // Opción respuesta seleccionada
 
   List<Question> _questions = []; // Lista de preguntas
-  int _totalScore = 0; // Puntaje total
+  int _scoreDepression = 0; // Puntuación total de depresión
+  int _scoreAnxiety = 0; // Puntuación total de ansiedad
+  int _scoreLoneliness = 0; // Puntuación total de soledad
   bool _isCompleted = false; // Indica si el cuestionario ha terminado
 
   @override
@@ -49,51 +51,120 @@ class _QuestionPageState extends State<QuestionPage> {
   }
 
   // Guarda la respuesta en Firebase
-  void _saveResponse(String pregunta, String respuesta) {
-    int score = _getScore(respuesta);
-    _totalScore += score;
-    //añadir nueva respuesta
-    FirebaseFirestore.instance.collection("respuestas").add({
-      "pregunta": pregunta,
-      "respuesta": respuesta,
-      "puntaje": score,
+  void _saveResponse(Question pregunta, String respuesta) {
+    // Acumula en la categoria correspondiente la puntuación
+    final score = _getScore(pregunta, respuesta);
+
+    // Acumula en la categoría correspondiente
+    switch (pregunta.category) {
+      case "depression":
+        _scoreDepression += score;
+        break;
+      case "anxiety":
+        _scoreAnxiety += score;
+        break;
+      case "loneliness":
+        _scoreLoneliness += score;
+        break;
+    }
+
+    print("📌 Respuesta: $respuesta");
+    print("🥇 Puntuación: $score");
+    print("📈Puntaje depresión: $_scoreDepression");
+    print("📈Puntaje ansiedad: $_scoreAnxiety");
+    print("📈Puntaje soledad: $_scoreLoneliness");
+  }
+
+  int _getScore(Question pregunta, String respuesta) {
+    switch (pregunta.category) {
+      case "depression":
+        switch (respuesta) {
+          case "Nunca":
+            return 0;
+          case "Rara vez":
+            return 1;
+          case "A veces":
+            return 2;
+          case "Casi siempre":
+            return 3;
+        }
+        break;
+      case "anxiety":
+        switch (respuesta) {
+          case "Nunca":
+            return 0;
+          case "Ninguna":
+            return 1;
+          case "A veces":
+            return 1;
+          case "Pocas":
+            return 1;
+          case "Frecuentemente":
+            return 2;
+          case "Algunas":
+            return 2;
+          case "Casi siempre":
+            return 3;
+          case "Sí, muchas":
+            return 3;
+        }
+        break;
+      case "loneliness":
+        switch (respuesta) {
+          case "Casi nunca":
+            return 0;
+          case "Frecuentemente":
+            return 0;
+          case "Siempre":
+            return 0;
+          case "Algunas veces":
+            return 1;
+          case "A veces":
+            return 1;
+          case "Rara vez":
+            return 2;
+          case "A menudo":
+            return 3;
+          case "Nunca":
+            return 3;
+        }
+        break;
+    }
+    return 0;
+  }
+
+  // Guarda los puntajes finales en Firebase
+  Future<void> _saveFinalScores() {
+    return FirebaseFirestore.instance
+        .collection("resultados") // o "respuestas_resumen"
+        .add({
+      "scoreDepression": _scoreDepression,
+      "scoreAnxiety": _scoreAnxiety,
+      "scoreLoneliness": _scoreLoneliness,
       "timestamp": FieldValue.serverTimestamp(),
-    }).then((_) {
-      print("✅ Respuesta guardada en Firebase");
-      print("📌 Respuesta: $respuesta");
-      print("🥇 Puntuación: $score");
-      print("📈Puntaje total: $_totalScore");
-    }).catchError((error) {
-      print("❌ Error al guardar respuesta: $error");
     });
   }
 
-  int _getScore(String respuesta) {
-    switch (respuesta) {
-      case "Casi nunca":
-        return 1;
-      case "Algunas veces":
-        return 2;
-      case "A menudo":
-        return 3;
-      default:
-        return 0;
-    }
-  }
-
+// Método para avanzar a la siguiente pregunta
   void _nextQuestion() {
-    // Método para avanzar a la siguiente pregunta
-
     if (_selectedOption != null) {
-      _saveResponse(_questions[_currentIndex].pregunta, _selectedOption!);
+      _saveResponse(_questions[_currentIndex], _selectedOption!);
     }
-
     if (_currentIndex < _questions.length - 1) {
       setState(() {
         _currentIndex++;
         _selectedOption = null; // Reset opción seleccionada
       });
     } else {
+      // Última pregunta: guardamos resultados y mostramos botones
+      _saveFinalScores().then((_) {
+        print("✅ Resultados finales guardados en Firebase");
+        print("📈Puntaje depresión: $_scoreDepression");
+        print("📈Puntaje ansiedad: $_scoreAnxiety");
+        print("📈Puntaje soledad: $_scoreLoneliness");
+      }).catchError((e) {
+        print("❌ Error guardando resumen: $e");
+      });
       setState(() {
         _isCompleted = true; // Marcar el cuestionario como finalizado
       });
@@ -148,8 +219,11 @@ class _QuestionPageState extends State<QuestionPage> {
                             Navigator.push(
                               context,
                               MaterialPageRoute(
-                                builder: (context) =>
-                                    RecommendationPage(score: _totalScore),
+                                builder: (context) => RecommendationPage(
+                                  depressionScore: _scoreDepression,
+                                  anxietyScore: _scoreAnxiety,
+                                  lonelinessScore: _scoreLoneliness,
+                                ),
                               ),
                             );
                           },
@@ -166,8 +240,11 @@ class _QuestionPageState extends State<QuestionPage> {
                             Navigator.push(
                               context,
                               MaterialPageRoute(
-                                builder: (context) =>
-                                    LLMRecommendationPage(score: _totalScore),
+                                builder: (context) => LLMRecommendationPage(
+                                  depressionScore: _scoreDepression,
+                                  anxietyScore: _scoreAnxiety,
+                                  lonelinessScore: _scoreLoneliness,
+                                ),
                               ),
                             );
                           },
@@ -187,7 +264,9 @@ class _QuestionPageState extends State<QuestionPage> {
                         setState(() {
                           _isCompleted = false;
                           //_currentQuestionIndex = 0;
-                          _totalScore = 0;
+                          _scoreDepression = 0;
+                          _scoreAnxiety = 0;
+                          _scoreLoneliness = 0;
                         });
                       },
                       style: ElevatedButton.styleFrom(
@@ -208,7 +287,11 @@ class _QuestionPageState extends State<QuestionPage> {
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   // Widget BigCard que muestra la pregunta actual
-                  BigCard(question: _questions[_currentIndex].pregunta),
+                  Center(
+                    child:
+                        BigCard(question: _questions[_currentIndex].pregunta),
+                  ),
+
                   SizedBox(height: 20),
 
                   // Opciones con botones de radio

@@ -11,7 +11,12 @@ class RecommendService {
   //final String referer = '<url>'; // Opcional
   //final String title = '<title>'; // Opcional
 
-  Future<String> sendMessage(String message) async {
+  Future<String> sendMessage({
+    required int depressionScore,
+    required int anxietyScore,
+    required int lonelinessScore,
+    required String message,
+  }) async {
     String getBackendUrl() {
       if (kIsWeb) {
         return 'https://openrouter.ai/api/v1/chat/completions'; //endpoint de OpenRouter: url para peticiones POST
@@ -22,7 +27,7 @@ class RecommendService {
       }
     }
 
-    final url = Uri.parse( 'https://openrouter.ai/api/v1/chat/completions');
+    final url = Uri.parse('https://openrouter.ai/api/v1/chat/completions');
 
     final headers = {
       'Content-Type': 'application/json', // Contenido JSON
@@ -36,9 +41,27 @@ class RecommendService {
           'meta-llama/llama-3.3-8b-instruct:free', // Modelo de IA a utilizar
       'messages': [
         {
+          //Prompt del sistema
           "role": "system",
-          "content":
-              message
+          "content": '''
+            Eres un asistente de salud mental enfocado en recomendar actividades prácticas. 
+            El usuario ha completado un cuestionario con tres puntuaciones:
+            - Depresión: $depressionScore
+            Si la puntuación de depresión es alta (10 < $depressionScore < 12), sugiere asesoramiento con un especialista en el campo de la depresión.
+            Si la puntuación de depresión es media (5 < $depressionScore < 9), sugiere actividades o técnicas de que reduzcan la depresión. 
+            Si la puntuación de depresión es baja (0 < $depressionScore < 4), sugiere actividades que fomenten el autocuidado personal. 
+            que fomenten la conexión social y el autocuidado.
+            - Ansiedad: $anxietyScore
+            Si la puntuación de ansiedad es alta (10 < $anxietyScore < 12), sugiere actividades o técnicas de relajación más específicas, profesionales y eficientes, y asesora visitar a un especialista en el campo del estrés.
+            Si la puntuación de ansiedad es media (5 < $anxietyScore < 9), sugiere actividades o técnicas de relajación que fomenten el autocuidado personal. 
+            Si la puntuación de ansiedad es baja (0 < $anxietyScore < 4), sugiere actividades cortas que permitan al usuario relajarse como salir a dar un paseo o técnicas de relajación.
+            - Soledad: $lonelinessScore
+            Si la puntuación de soledad es alta (12 < $lonelinessScore < 18), sugiere actividades o técnicas de relajación más específicas, profesionales y eficientes, y asesora visitar a un especialista en el campo del estrés.
+            Si la puntuación de soledad es media (5 < $lonelinessScore < 11), sugiere actividades que impliquen realizar interacción con otras personas. 
+            Si la puntuación de soledad es baja (0 < $lonelinessScore < 4), sugiere realizar actividades como quedar con un amigo.
+            Proporciona recomendaciones mecánicas claras y específicas basadas en estos valores.
+          '''
+              .trim()
         },
         {
           //Prompt del usuario ---> IA a modificar

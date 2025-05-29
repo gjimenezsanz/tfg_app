@@ -171,7 +171,11 @@ class _GraphicPageState extends State<GraphicPage> {
                     Navigator.push(
                       context,
                       MaterialPageRoute(
-                        builder: (context) => RecommendationPage(score: 0),
+                        builder: (context) => RecommendationPage(
+                          depressionScore: 0,
+                          anxietyScore: 0,
+                          lonelinessScore: 0,
+                        ),
                       ),
                     );
                   },

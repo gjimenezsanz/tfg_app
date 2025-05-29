@@ -1,15 +1,21 @@
 import 'package:flutter/material.dart';
 
 class RecommendationPage extends StatelessWidget {
-  final int score;
+  final int depressionScore;
+  final int anxietyScore;
+  final int lonelinessScore;
 
-  RecommendationPage({required this.score});
+  RecommendationPage({
+    required this.depressionScore,
+    required this.anxietyScore,
+    required this.lonelinessScore,
+  });
 
   // Respuesta según la puntuación del parámetro de depresión
   String getDepressionRecommendation() {
-    if (score <= 5) {
+    if (depressionScore <= 5) {
       return "Tu nivel de síntomas depresivos es bajo. Continúa con actividades que te generen bienestar emocional y mantén un estilo de vida saludable.";
-    } else if (score <= 10) {
+    } else if (depressionScore <= 10) {
       return "Tu nivel de síntomas depresivos es moderado. Podría ser útil hablar con alguien de confianza o un profesional si sientes que estos síntomas afectan tu vida diaria.";
     } else {
       return "Tu nivel de síntomas depresivos es alto. Se recomienda buscar apoyo profesional y rodearte de personas que puedan brindarte apoyo emocional.";
@@ -18,9 +24,9 @@ class RecommendationPage extends StatelessWidget {
 
   // Respuesta según la puntuación del parámetro de ansiedad
   String getAnxietyRecommendation() {
-    if (score <= 5) {
+    if (anxietyScore <= 5) {
       return "Tu nivel de ansiedad es bajo. Sigue manteniendo una buena gestión del estrés y busca momentos para relajarte.";
-    } else if (score <= 10) {
+    } else if (anxietyScore <= 10) {
       return "Tu nivel de ansiedad es moderado. Intenta practicar técnicas de relajación como la respiración profunda o la meditación.";
     } else {
       return "Tu nivel de ansiedad es alto. Sería recomendable buscar ayuda profesional para aprender estrategias de manejo del estrés y la ansiedad.";
@@ -29,9 +35,9 @@ class RecommendationPage extends StatelessWidget {
 
   // Respuesta según la puntuación del parámetro de soledad
   String getLonelinessRecommendation() {
-    if (score <= 3) {
+    if (lonelinessScore <= 3) {
       return "Tu nivel de aislamiento social es bajo. Sigue manteniendo una vida social activa y apóyate en tus seres queridos.";
-    } else if (score <= 6) {
+    } else if (lonelinessScore <= 6) {
       return "Tu nivel de aislamiento es moderado. Intenta mantener más contacto con amigos y familiares. Participar en actividades grupales puede ayudarte.";
     } else {
       return "Tu nivel de aislamiento es alto. Podría ser útil hablar con alguien de confianza o un profesional. Considera unirte a comunidades o buscar apoyo.";
@@ -74,6 +80,13 @@ class RecommendationPage extends StatelessWidget {
               textAlign: TextAlign.center,
             ),
             Text(
+              "Tu depresión tiene una puntuación de: $depressionScore",
+              style: TextStyle(
+                  fontSize: 15,
+                  color: Theme.of(context).colorScheme.primaryContainer),
+              textAlign: TextAlign.center,
+            ),
+            Text(
               getDepressionRecommendation(),
               style: TextStyle(
                   fontSize: 18, color: Theme.of(context).colorScheme.onPrimary),
@@ -89,6 +102,13 @@ class RecommendationPage extends StatelessWidget {
               textAlign: TextAlign.center,
             ),
             Text(
+              "Tu ansiedad tiene una puntuación de: $anxietyScore",
+              style: TextStyle(
+                  fontSize: 15,
+                  color: Theme.of(context).colorScheme.primaryContainer),
+              textAlign: TextAlign.center,
+            ),
+            Text(
               getAnxietyRecommendation(),
               style: TextStyle(
                   fontSize: 18, color: Theme.of(context).colorScheme.onPrimary),
@@ -100,6 +120,13 @@ class RecommendationPage extends StatelessWidget {
               style: TextStyle(
                   fontSize: 20,
                   fontWeight: FontWeight.bold,
+                  color: Theme.of(context).colorScheme.primaryContainer),
+              textAlign: TextAlign.center,
+            ),
+            Text(
+              "Tu soledad tiene una puntuación de: $lonelinessScore",
+              style: TextStyle(
+                  fontSize: 15,
                   color: Theme.of(context).colorScheme.primaryContainer),
               textAlign: TextAlign.center,
             ),

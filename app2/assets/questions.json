@@ -2,59 +2,73 @@
   "preguntas": [
     {
       "pregunta": "En las últimas dos semanas, con qué frecuencia has sentido tristeza o desesperanza?",
-      "opciones": ["Nunca", "A veces", "Frecuentemente", "Casi siempre"]
+      "opciones": ["Nunca", "A veces", "Frecuentemente", "Casi siempre"],
+      "category": "depression"
     },
     {
       "pregunta": "¿Has sentido pérdida de interés o placer en actividades que antes disfrutabas?",
-      "opciones": ["Nunca", "A veces", "Frecuentemente", "Casi siempre"]
+      "opciones": ["Nunca", "A veces", "Frecuentemente", "Casi siempre"],
+      "category": "depression"
     },
     {
       "pregunta": "¿Con qué frecuencia has experimentado dificultades para dormir (insomnio o sueño excesivo)?",
-      "opciones": ["Nunca", "A veces", "Frecuentemente", "Casi siempre"]
+      "opciones": ["Nunca", "A veces", "Frecuentemente", "Casi siempre"],
+      "category": "depression"
     },
     {
       "pregunta": "¿Te has sentido culpable o como si no tuvieras valor en los últimos días?",
-      "opciones": ["Nunca", "A veces", "Frecuentemente", "Casi siempre"]
+      "opciones": ["Nunca", "A veces", "Frecuentemente", "Casi siempre"],
+      "category": "depression"
     },
     {
       "pregunta": "En los últimos días, ¿has sentido tensión o ansiedad sin una razón específica?",
-      "opciones": ["Nunca", "A veces", "Frecuentemente", "Casi siempre"]
+      "opciones": ["Nunca", "A veces", "Frecuentemente", "Casi siempre"],
+      "category": "anxiety"
     },
     {
       "pregunta": "¿Con qué frecuencia has sentido que no puedes controlar tus preocupaciones?",
-      "opciones": ["Nunca", "A veces", "Frecuentemente", "Casi siempre"]
+      "opciones": ["Nunca", "A veces", "Frecuentemente", "Casi siempre"],
+      "category": "anxiety"
     },
     {
       "pregunta": "¿Sientes que tu ritmo cardíaco se acelera o sudas cuando estás nervioso/a?",
-      "opciones": ["Nunca", "A veces", "Frecuentemente", "Casi siempre"]
+      "opciones": ["Nunca", "A veces", "Frecuentemente", "Casi siempre"],
+      "category": "anxiety"
     },
     {
       "pregunta": "¿Con qué frecuencia sientes que te falta compañía?",
-      "opciones": ["Casi nunca", "Algunas veces", "A menudo"]
+      "opciones": ["Casi nunca", "Algunas veces", "A menudo"],
+      "category": "loneliness"
     },
     {
       "pregunta": "¿Con qué frecuencia te sientes excluido/a?",
-      "opciones": ["Casi nunca", "Algunas veces", "A menudo"]
+      "opciones": ["Casi nunca", "Algunas veces", "A menudo"],
+      "category": "loneliness"
     },
     {
       "pregunta": "¿Con qué frecuencia te sientes aislado/a de los demás?",
-      "opciones": ["Casi nunca", "Algunas veces", "A menudo"]
+      "opciones": ["Casi nunca", "Algunas veces", "A menudo"],
+      "category": "loneliness"
     },
     {
       "pregunta": "¿Sientes que tienes apoyo emocional cuando lo necesitas?",
-      "opciones": ["Siempre", "A veces", "Rara vez", "Nunca"]
+      "opciones": ["Siempre", "A veces", "Rara vez", "Nunca"],
+      "category": "loneliness"
     },
     {
       "pregunta": "¿Tienes a alguien con quien compartir tus pensamientos y preocupaciones?",
-      "opciones": ["Siempre", "A veces", "Rara vez", "Nunca"]
+      "opciones": ["Siempre", "A veces", "Rara vez", "Nunca"],
+      "category": "loneliness"
     },
     {
       "pregunta": "Cuando te sientes estresado/a, ¿tienes estrategias para relajarte?",
-      "opciones": ["Sí, muchas", "Algunas", "Pocas", "Ninguna"]
+      "opciones": ["Sí, muchas", "Algunas", "Pocas", "Ninguna"],
+      "category": "anxiety"
     },
     {
       "pregunta": "¿Con qué frecuencia realizas actividades sociales fuera del ámbito laboral o académico?",
-      "opciones": ["Frecuentemente", "Algunas veces", "Rara vez", "Nunca"]
+      "opciones": ["Frecuentemente", "Algunas veces", "Rara vez", "Nunca"],
+      "category": "loneliness"
     }
   ]
 }

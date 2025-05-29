@@ -2,8 +2,14 @@ import 'package:flutter/material.dart';
 import 'package:app2/services/recommend_service.dart';
 
 class LLMRecommendationPage extends StatefulWidget {
-  final int score;
-  LLMRecommendationPage({required this.score});
+  final int depressionScore;
+  final int anxietyScore;
+  final int lonelinessScore;
+  LLMRecommendationPage({
+    required this.depressionScore,
+    required this.anxietyScore,
+    required this.lonelinessScore,
+  });
   @override
   State<LLMRecommendationPage> createState() => _RecommendationPageState();
 }
@@ -28,17 +34,14 @@ class _RecommendationPageState extends State<LLMRecommendationPage> {
       _error = null;
     });
 
-    // Construir prompt dinámico según la puntuación
-    // widget.score : // Puntuación total del cuestionario
-    final prompt = StringBuffer()
-      ..writeln(
-          'He obtenido una puntuación total de ${widget.score} en el cuestionario que mide niveles de depresión, ansiedad y soledad.')
-      ..writeln(
-          'Por favor, proporciona recomendaciones personalizadas y prácticas para mejorar el bienestar emocional según este resultado. Sé conciso y empático.');
-
     try {
-      final response = await _recommendService
-          .sendMessage(prompt.toString()); // Envía el prompt al LLM
+      final response = await _recommendService.sendMessage(
+        depressionScore: widget.depressionScore,
+        anxietyScore: widget.anxietyScore,
+        lonelinessScore: widget.lonelinessScore,
+        message:
+            'Por favor, genera recomendaciones prácticas basadas en mis resultados.',
+      ); // Envía el prompt al LLM
       setState(() {
         _recommendation =
             response; // Actualiza la recomendación con la respuesta del LLM
@@ -112,24 +115,30 @@ class _RecommendationPageState extends State<LLMRecommendationPage> {
                           ),
                         ),
                         const SizedBox(height: 16),
-                        ElevatedButton(
-                          onPressed: _fetchRecommendation,
-                          child: const Text('Actualizar Recomendaciones'),
-                        ),
-                        const SizedBox(height: 8),
-                        ElevatedButton(
-                          onPressed: () => Navigator.pop(context),
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor:
-                                Colors.deepPurple.shade200.withOpacity(0.8),
-                          ),
-                          child: Text(
-                            'Volver',
-                            style: TextStyle(
-                              color: Theme.of(context).colorScheme.onPrimary,
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            ElevatedButton(
+                              onPressed: _fetchRecommendation,
+                              child: const Text('Actualizar Recomendaciones'),
                             ),
-                            textAlign: TextAlign.center,
-                          ),
+                            SizedBox(width: 20), // espacio entre botones
+                            ElevatedButton(
+                              onPressed: () => Navigator.pop(context),
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor:
+                                    Colors.deepPurple.shade200.withOpacity(0.8),
+                              ),
+                              child: Text(
+                                'Volver',
+                                style: TextStyle(
+                                  color:
+                                      Theme.of(context).colorScheme.onPrimary,
+                                ),
+                                textAlign: TextAlign.center,
+                              ),
+                            ),
+                          ],
                         ),
                       ],
                     ),

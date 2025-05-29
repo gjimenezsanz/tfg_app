@@ -22,7 +22,7 @@ class ChatService {
       }
     }
 
-    final url = Uri.parse( 'https://openrouter.ai/api/v1/chat/completions');
+    final url = Uri.parse('https://openrouter.ai/api/v1/chat/completions');
 
     final headers = {
       'Content-Type': 'application/json', // Contenido JSON
@@ -34,6 +34,7 @@ class ChatService {
     final body = json.encode({
       'model':
           'meta-llama/llama-3.3-8b-instruct:free', // Modelo de IA a utilizar
+
       'messages': [
         {
           "role": "system",

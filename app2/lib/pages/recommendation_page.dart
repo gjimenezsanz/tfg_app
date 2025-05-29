@@ -114,7 +114,15 @@ class RecommendationPage extends StatelessWidget {
               onPressed: () {
                 Navigator.pop(context);
               },
-              child: Text("Volver"),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.deepPurple.shade200.withOpacity(0.8),
+              ),
+              child: Text(
+                "Volver",
+                style: TextStyle(
+                  color: Theme.of(context).colorScheme.onPrimary,
+                ),
+              ),
             ),
           ],
         ),

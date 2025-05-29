@@ -5,15 +5,15 @@ import json
 API_KEY = "REDACTED_OPENROUTER_KEY"  # API Key OpenRouter
 REFERER = "<url>"
 TITLE = "<title>"
-
+app = Flask(__name__)
 @app.route('/chat', methods=['POST'])
 def chat():
     data = request.get_json()
-    message = data.get("message") # Mensaje del usuario
+    message = data.get("message", "")  # Mensaje del usuario
 
     headers = {
         "Authorization": f"Bearer {API_KEY}",
-        "HTTP-Referer": REFERER,
+        "Referer": REFERER, 
         "X-Title": TITLE,
         "Content-Type": "application/json"
     }
@@ -26,7 +26,7 @@ def chat():
     response = requests.post(
         "https://openrouter.ai/api/v1/chat/completions", # Endpoint de OpenRouter: url para peticiones POST
         headers=headers,
-        data=json.dumps(body)
+        json=body 
     )
 
     # Verifica si la respuesta es correcta

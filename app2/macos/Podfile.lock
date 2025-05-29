@@ -1372,10 +1372,10 @@ EXTERNAL SOURCES:
 SPEC CHECKSUMS:
   abseil: d121da9ef7e2ff4cab7666e76c5a3e0915ae08c3
   BoringSSL-GRPC: ca6a8e5d04812fce8ffd6437810c2d46f925eaeb
-  cloud_firestore: 397c2115b8c51d2b0895f9ef2cbdc14389b4a2d2
+  cloud_firestore: 8aa391991e932e3da744fe79447cf3994c8ad79d
   Firebase: 973c28133496aab0223e9ea99f0abafb9f91ad58
-  firebase_auth: 1ba04f99fdeafab446f90257899b6038eb0a9816
-  firebase_core: 68e1d27035b096239f147a041643e14e156f1481
+  firebase_auth: 8edeccceb620f6ef6f7b77629baa8c6727f10970
+  firebase_core: 09900d820b67333857f9cdded7ac10558f1f5592
   FirebaseAppCheckInterop: 7bf86d55a2b7e9bd91464120eba3e52e4b63b2e2
   FirebaseAuth: ad59a1a7b161e75f74c39f70179d2482d40e2737
   FirebaseAuthInterop: 651756e70d9a0b9160db39ead71fd5507dbb6c84

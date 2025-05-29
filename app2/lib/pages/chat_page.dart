@@ -31,15 +31,34 @@ class _ChatPageState extends State<ChatPage> {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
     return Scaffold(
-      appBar: AppBar(title: Text("Chat con IA")),
+      backgroundColor: const Color.fromARGB(255, 0, 29, 49),
+      appBar: AppBar(
+        title: Text("Assistant Chat"),
+        backgroundColor: Colors.black,
+        titleTextStyle: TextStyle(
+            fontSize: 25,
+            fontWeight: FontWeight.bold,
+            color: Theme.of(context).colorScheme.primaryContainer),
+      ),
       body: Column(
         children: [
           Expanded(
             child: Center(
               child: _response == null
-                  ? Text("Escribe un mensaje para comenzar")
-                  : Text(_response!, style: TextStyle(fontSize: 18)),
+                  ? Text(
+                      "Writte a message to start a conversation with your assistant",
+                      style: TextStyle(
+                          fontSize: 18,
+                          color: colorScheme.onPrimary,
+                          fontStyle: FontStyle.italic),
+                    )
+                  : Text(
+                      _response!,
+                      style:
+                          TextStyle(fontSize: 18, color: colorScheme.onPrimary),
+                    ),
             ),
           ),
           Padding(
@@ -49,11 +68,16 @@ class _ChatPageState extends State<ChatPage> {
                 Expanded(
                   child: TextField(
                     controller: _controller,
-                    decoration: InputDecoration(labelText: "Escribe aquí..."),
+                    decoration: InputDecoration(
+                        labelText: "Text here...",
+                        labelStyle: TextStyle(
+                            color: colorScheme.primaryContainer, fontSize: 18)),
+                    style: TextStyle(color: colorScheme.primaryContainer),
                   ),
                 ),
                 IconButton(
                   icon: Icon(Icons.send),
+                  color: colorScheme.primary,
                   onPressed:
                       _sendMessage, // Envía el mensaje al presionar el botón
                 ),

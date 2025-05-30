@@ -47,111 +47,138 @@ class RecommendationPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text("Recomendaciones"),
-        backgroundColor: Colors.black,
-        titleTextStyle: TextStyle(
-            fontSize: 20,
-            fontWeight: FontWeight.bold,
-            color: Theme.of(context).colorScheme.primaryContainer),
+      appBar: PreferredSize(
+        preferredSize: Size.fromHeight(kToolbarHeight),
+        child: Container(
+          // Ponemos la imagen de fondo aquí
+          decoration: BoxDecoration(
+            image: DecorationImage(
+              image: AssetImage('assets/images/fondo2.jpg'),
+              fit: BoxFit.cover,
+            ),
+          ),
+          child: AppBar(
+            title: Text("Recomendaciones"),
+            backgroundColor: Colors.transparent,
+            titleTextStyle: TextStyle(
+              fontSize: 25,
+              fontWeight: FontWeight.bold,
+              color: Theme.of(context).colorScheme.primaryContainer,
+            ),
+          ),
+        ),
       ),
-      backgroundColor: const Color.fromARGB(255, 0, 15, 49),
-      body: Padding(
-        padding: EdgeInsets.all(16.0),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: [
-            Text(
-              "Resultados del cuestionario",
-              style: TextStyle(
-                  fontSize: 22,
-                  fontWeight: FontWeight.bold,
-                  color: Theme.of(context).colorScheme.onPrimary),
-              textAlign: TextAlign.center,
+      //backgroundColor: const Color.fromARGB(255, 0, 15, 49),
+      body: SizedBox.expand(
+        child: Container(
+          decoration: BoxDecoration(
+            image: DecorationImage(
+              image: AssetImage('assets/images/fondo1.jpg'),
+              fit: BoxFit.cover,
             ),
-            SizedBox(height: 20),
-            Text(
-              "Depresión:",
-              style: TextStyle(
-                  fontSize: 20,
-                  fontWeight: FontWeight.bold,
-                  color: Theme.of(context).colorScheme.primaryContainer),
-              textAlign: TextAlign.center,
-            ),
-            Text(
-              "Tu depresión tiene una puntuación de: $depressionScore",
-              style: TextStyle(
-                  fontSize: 15,
-                  color: Theme.of(context).colorScheme.primaryContainer),
-              textAlign: TextAlign.center,
-            ),
-            Text(
-              getDepressionRecommendation(),
-              style: TextStyle(
-                  fontSize: 18, color: Theme.of(context).colorScheme.onPrimary),
-              textAlign: TextAlign.center,
-            ),
-            SizedBox(height: 20),
-            Text(
-              "Ansiedad:",
-              style: TextStyle(
-                  fontSize: 20,
-                  fontWeight: FontWeight.bold,
-                  color: Theme.of(context).colorScheme.primaryContainer),
-              textAlign: TextAlign.center,
-            ),
-            Text(
-              "Tu ansiedad tiene una puntuación de: $anxietyScore",
-              style: TextStyle(
-                  fontSize: 15,
-                  color: Theme.of(context).colorScheme.primaryContainer),
-              textAlign: TextAlign.center,
-            ),
-            Text(
-              getAnxietyRecommendation(),
-              style: TextStyle(
-                  fontSize: 18, color: Theme.of(context).colorScheme.onPrimary),
-              textAlign: TextAlign.center,
-            ),
-            SizedBox(height: 20),
-            Text(
-              "Soledad y Aislamiento Social:",
-              style: TextStyle(
-                  fontSize: 20,
-                  fontWeight: FontWeight.bold,
-                  color: Theme.of(context).colorScheme.primaryContainer),
-              textAlign: TextAlign.center,
-            ),
-            Text(
-              "Tu soledad tiene una puntuación de: $lonelinessScore",
-              style: TextStyle(
-                  fontSize: 15,
-                  color: Theme.of(context).colorScheme.primaryContainer),
-              textAlign: TextAlign.center,
-            ),
-            Text(
-              getLonelinessRecommendation(),
-              style: TextStyle(
-                  fontSize: 18, color: Theme.of(context).colorScheme.onPrimary),
-              textAlign: TextAlign.center,
-            ),
-            SizedBox(height: 30),
-            ElevatedButton(
-              onPressed: () {
-                Navigator.pop(context);
-              },
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.deepPurple.shade200.withOpacity(0.8),
-              ),
-              child: Text(
-                "Volver",
-                style: TextStyle(
-                  color: Theme.of(context).colorScheme.onPrimary,
+          ),
+          child: Padding(
+            padding: EdgeInsets.all(16.0),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                Text(
+                  "Resultados del cuestionario",
+                  style: TextStyle(
+                      fontSize: 22,
+                      fontWeight: FontWeight.bold,
+                      color: Theme.of(context).colorScheme.onPrimary),
+                  textAlign: TextAlign.center,
                 ),
-              ),
+                SizedBox(height: 20),
+                Text(
+                  "Depresión:",
+                  style: TextStyle(
+                      fontSize: 20,
+                      fontWeight: FontWeight.bold,
+                      color: Theme.of(context).colorScheme.primaryContainer),
+                  textAlign: TextAlign.center,
+                ),
+                Text(
+                  "Tu depresión tiene una puntuación de: $depressionScore",
+                  style: TextStyle(
+                      fontSize: 15,
+                      color: Theme.of(context).colorScheme.primaryContainer),
+                  textAlign: TextAlign.center,
+                ),
+                Text(
+                  getDepressionRecommendation(),
+                  style: TextStyle(
+                      fontSize: 18,
+                      color: Theme.of(context).colorScheme.onPrimary),
+                  textAlign: TextAlign.center,
+                ),
+                SizedBox(height: 20),
+                Text(
+                  "Ansiedad:",
+                  style: TextStyle(
+                      fontSize: 20,
+                      fontWeight: FontWeight.bold,
+                      color: Theme.of(context).colorScheme.primaryContainer),
+                  textAlign: TextAlign.center,
+                ),
+                Text(
+                  "Tu ansiedad tiene una puntuación de: $anxietyScore",
+                  style: TextStyle(
+                      fontSize: 15,
+                      color: Theme.of(context).colorScheme.primaryContainer),
+                  textAlign: TextAlign.center,
+                ),
+                Text(
+                  getAnxietyRecommendation(),
+                  style: TextStyle(
+                      fontSize: 18,
+                      color: Theme.of(context).colorScheme.onPrimary),
+                  textAlign: TextAlign.center,
+                ),
+                SizedBox(height: 20),
+                Text(
+                  "Soledad y Aislamiento Social:",
+                  style: TextStyle(
+                      fontSize: 20,
+                      fontWeight: FontWeight.bold,
+                      color: Theme.of(context).colorScheme.primaryContainer),
+                  textAlign: TextAlign.center,
+                ),
+                Text(
+                  "Tu soledad tiene una puntuación de: $lonelinessScore",
+                  style: TextStyle(
+                      fontSize: 15,
+                      color: Theme.of(context).colorScheme.primaryContainer),
+                  textAlign: TextAlign.center,
+                ),
+                Text(
+                  getLonelinessRecommendation(),
+                  style: TextStyle(
+                      fontSize: 18,
+                      color: Theme.of(context).colorScheme.onPrimary),
+                  textAlign: TextAlign.center,
+                ),
+                SizedBox(height: 30),
+                ElevatedButton(
+                  onPressed: () {
+                    Navigator.pop(context);
+                  },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor:
+                        Colors.deepPurple.shade200.withOpacity(0.8),
+                  ),
+                  child: Text(
+                    "Volver",
+                    style: TextStyle(
+                      color: Theme.of(context).colorScheme.onPrimary,
+                    ),
+                  ),
+                ),
+              ],
             ),
-          ],
+          ),
         ),
       ),
     );

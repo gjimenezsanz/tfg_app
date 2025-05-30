@@ -85,37 +85,46 @@ class _MyHomePageState extends State<MyHomePage> {
             //para pantallas más grandes
             return Row(
               children: [
-                SafeArea(
-                  child: NavigationRail(
-                    //menu de navegación
-                    extended: constraints.maxWidth >=
-                        600, //se ven las palabras e iconos
-                    destinations: [
-                      NavigationRailDestination(
-                        icon: Icon(Icons.home_rounded),
-                        label: Text('Home'),
-                      ),
-                      NavigationRailDestination(
-                        icon: Icon(Icons.stacked_bar_chart),
-                        label: Text('Statics'),
-                      ),
-                      NavigationRailDestination(
-                        icon: Icon(Icons.person_rounded),
-                        label: Text('User'),
-                      ),
-                    ],
-                    backgroundColor: Colors.black,
-                    selectedLabelTextStyle: TextStyle(color: Colors.white),
-                    unselectedLabelTextStyle: TextStyle(color: Colors.grey),
-                    selectedIconTheme: IconThemeData(color: Colors.black),
-                    unselectedIconTheme: IconThemeData(color: Colors.grey),
-                    selectedIndex: selectedIndex, //home
-                    onDestinationSelected: (value) {
-                      setState(() {
-                        //clase que notifica del cambio de estado
-                        selectedIndex = value;
-                      });
-                    },
+                Container(
+                  // Ponemos la imagen de fondo aquí
+                  decoration: BoxDecoration(
+                    image: DecorationImage(
+                      image: AssetImage('assets/images/fondo2.jpg'),
+                      fit: BoxFit.cover,
+                    ),
+                  ),
+                  child: SafeArea(
+                    child: NavigationRail(
+                      //menu de navegación
+                      extended: constraints.maxWidth >=
+                          600, //se ven las palabras e iconos
+                      destinations: [
+                        NavigationRailDestination(
+                          icon: Icon(Icons.home_rounded),
+                          label: Text('Home'),
+                        ),
+                        NavigationRailDestination(
+                          icon: Icon(Icons.stacked_bar_chart),
+                          label: Text('Statics'),
+                        ),
+                        NavigationRailDestination(
+                          icon: Icon(Icons.person_rounded),
+                          label: Text('User'),
+                        ),
+                      ],
+                      backgroundColor: Colors.transparent,
+                      selectedLabelTextStyle: TextStyle(color: Colors.white),
+                      unselectedLabelTextStyle: TextStyle(color: Colors.grey),
+                      selectedIconTheme: IconThemeData(color: Colors.black),
+                      unselectedIconTheme: IconThemeData(color: Colors.grey),
+                      selectedIndex: selectedIndex, //home
+                      onDestinationSelected: (value) {
+                        setState(() {
+                          //clase que notifica del cambio de estado
+                          selectedIndex = value;
+                        });
+                      },
+                    ),
                   ),
                 ),
                 Expanded(child: mainArea), //widget expandido

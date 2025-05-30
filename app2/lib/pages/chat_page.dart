@@ -33,59 +33,81 @@ class _ChatPageState extends State<ChatPage> {
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
     return Scaffold(
-      backgroundColor: const Color.fromARGB(255, 0, 29, 49),
-      appBar: AppBar(
-        title: Text("Assistant Chat"),
-        backgroundColor: Colors.black,
-        titleTextStyle: TextStyle(
-            fontSize: 25,
-            fontWeight: FontWeight.bold,
-            color: Theme.of(context).colorScheme.primaryContainer),
-      ),
-      body: Column(
-        children: [
-          Expanded(
-            child: Center(
-              child: _response == null
-                  ? Text(
-                      "Writte a message to start a conversation with your assistant",
-                      style: TextStyle(
-                          fontSize: 18,
-                          color: colorScheme.onPrimary,
-                          fontStyle: FontStyle.italic),
-                    )
-                  : Text(
-                      _response!,
-                      style:
-                          TextStyle(fontSize: 18, color: colorScheme.onPrimary),
-                    ),
+        appBar: PreferredSize(
+          preferredSize: Size.fromHeight(kToolbarHeight),
+          child: Container(
+            // Ponemos la imagen de fondo aquí
+            decoration: BoxDecoration(
+              image: DecorationImage(
+                image: AssetImage('assets/images/fondo2.jpg'),
+                fit: BoxFit.cover,
+              ),
+            ),
+            child: AppBar(
+              title: Text("Assistant Chat"),
+              backgroundColor: Colors.transparent,
+              titleTextStyle: TextStyle(
+                fontSize: 25,
+                fontWeight: FontWeight.bold,
+                color: Theme.of(context).colorScheme.primaryContainer,
+              ),
             ),
           ),
-          Padding(
-            padding: EdgeInsets.all(8.0),
-            child: Row(
+        ),
+        body: SizedBox.expand(
+          child: Container(
+            decoration: BoxDecoration(
+              image: DecorationImage(
+                image: AssetImage('assets/images/fondo1.jpg'),
+                fit: BoxFit.cover,
+              ),
+            ),
+            child: Column(
               children: [
                 Expanded(
-                  child: TextField(
-                    controller: _controller,
-                    decoration: InputDecoration(
-                        labelText: "Text here...",
-                        labelStyle: TextStyle(
-                            color: colorScheme.primaryContainer, fontSize: 18)),
-                    style: TextStyle(color: colorScheme.primaryContainer),
+                  child: Center(
+                    child: _response == null
+                        ? Text(
+                            "Writte a message to start a conversation with your assistant",
+                            style: TextStyle(
+                                fontSize: 18,
+                                color: colorScheme.onPrimary,
+                                fontStyle: FontStyle.italic),
+                          )
+                        : Text(
+                            _response!,
+                            style: TextStyle(
+                                fontSize: 18, color: colorScheme.onPrimary),
+                          ),
                   ),
                 ),
-                IconButton(
-                  icon: Icon(Icons.send),
-                  color: colorScheme.primary,
-                  onPressed:
-                      _sendMessage, // Envía el mensaje al presionar el botón
+                Padding(
+                  padding: EdgeInsets.all(8.0),
+                  child: Row(
+                    children: [
+                      Expanded(
+                        child: TextField(
+                          controller: _controller,
+                          decoration: InputDecoration(
+                              labelText: "Text here...",
+                              labelStyle: TextStyle(
+                                  color: colorScheme.primaryContainer,
+                                  fontSize: 18)),
+                          style: TextStyle(color: colorScheme.primaryContainer),
+                        ),
+                      ),
+                      IconButton(
+                        icon: Icon(Icons.send),
+                        color: colorScheme.primary,
+                        onPressed:
+                            _sendMessage, // Envía el mensaje al presionar el botón
+                      ),
+                    ],
+                  ),
                 ),
               ],
             ),
           ),
-        ],
-      ),
-    );
+        ));
   }
 }

@@ -147,14 +147,25 @@ class _GraphicPageState extends State<GraphicPage> {
     var colorScheme = Theme.of(context).colorScheme;
     return Scaffold(
       appBar: AppBar(title: Text("Progreso Semanal")),
-      body: SingleChildScrollView(
-        child: Column(
-          children: [
-            _buildChart("Depresión (BDI-II)", depressionData, Colors.redAccent),
-            _buildChart("Ansiedad (BSI)", anxietyData, Colors.orangeAccent),
-            _buildChart("Soledad (UCLA Loneliness Scale)", lonelinessData,
-                Colors.blueAccent),
-          ],
+      body: SizedBox.expand(
+        child: Container(
+          decoration: BoxDecoration(
+            image: DecorationImage(
+              image: AssetImage('assets/images/fondo1.jpg'),
+              fit: BoxFit.cover,
+            ),
+          ),
+          child: SingleChildScrollView(
+            child: Column(
+              children: [
+                _buildChart(
+                    "Depresión (BDI-II)", depressionData, Colors.redAccent),
+                _buildChart("Ansiedad (BSI)", anxietyData, Colors.orangeAccent),
+                _buildChart("Soledad (UCLA Loneliness Scale)", lonelinessData,
+                    Colors.blueAccent),
+              ],
+            ),
+          ),
         ),
       ),
       floatingActionButton: Padding(

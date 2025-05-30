@@ -184,165 +184,191 @@ class _QuestionPageState extends State<QuestionPage> {
     }
 
     return Scaffold(
-      appBar: AppBar(
-        title: Text("Cuestionario"),
-        backgroundColor: Colors.black,
-        titleTextStyle: TextStyle(
-            fontSize: 25,
-            fontWeight: FontWeight.bold,
-            color: Theme.of(context).colorScheme.primaryContainer),
+      appBar: PreferredSize(
+        preferredSize: Size.fromHeight(kToolbarHeight),
+        child: Container(
+          // Ponemos la imagen de fondo aquí
+          decoration: BoxDecoration(
+            image: DecorationImage(
+              image: AssetImage('assets/images/fondo2.jpg'),
+              fit: BoxFit.cover,
+            ),
+          ),
+          child: AppBar(
+            title: Text("Cuestionario"),
+            backgroundColor: Colors.transparent,
+            titleTextStyle: TextStyle(
+              fontSize: 25,
+              fontWeight: FontWeight.bold,
+              color: Theme.of(context).colorScheme.primaryContainer,
+            ),
+          ),
+        ),
       ),
-      backgroundColor: const Color.fromARGB(255, 0, 15, 49),
-      body: Padding(
-        padding: EdgeInsets.all(16.0),
-        child: _isCompleted
-            // Si ha terminado el cuestionario => Pantalla final
-            ? Center(
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: [
-                    Text(
-                      "Cuestionario terminado con exito!!",
-                      style: TextStyle(
-                          fontSize: 40,
-                          fontWeight: FontWeight.bold,
-                          color: Theme.of(context).colorScheme.onPrimary),
-                      textAlign: TextAlign.center,
-                    ),
-                    SizedBox(height: 40),
-                    Row(
+      //backgroundColor: const Color.fromARGB(255, 0, 15, 49),
+      body: SizedBox.expand(
+        //Fondo pantalla
+        child: Container(
+          decoration: BoxDecoration(
+            image: DecorationImage(
+              image: AssetImage('assets/images/fondo1.jpg'),
+              fit: BoxFit.cover,
+            ),
+          ),
+          child: Padding(
+            padding: EdgeInsets.all(16.0),
+            child: _isCompleted
+                // Si ha terminado el cuestionario => Pantalla final
+                ? Center(
+                    child: Column(
                       mainAxisSize: MainAxisSize.min,
+                      crossAxisAlignment: CrossAxisAlignment.center,
                       children: [
-                        ElevatedButton(
-                          onPressed: () {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (context) => RecommendationPage(
-                                  depressionScore: _scoreDepression,
-                                  anxietyScore: _scoreAnxiety,
-                                  lonelinessScore: _scoreLoneliness,
-                                ),
-                              ),
-                            );
-                          },
-                          child: Text(
-                            "Ver recomendaciones con respuesta mecánica",
-                            style: TextStyle(
-                              fontSize: 15,
-                            ),
-                          ),
+                        Text(
+                          "Cuestionario terminado con exito!!",
+                          style: TextStyle(
+                              fontSize: 40,
+                              fontWeight: FontWeight.bold,
+                              color: Theme.of(context).colorScheme.onPrimary),
+                          textAlign: TextAlign.center,
                         ),
-                        SizedBox(width: 20), // espacio entre botones
-                        ElevatedButton(
-                          onPressed: () {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (context) => LLMRecommendationPage(
-                                  depressionScore: _scoreDepression,
-                                  anxietyScore: _scoreAnxiety,
-                                  lonelinessScore: _scoreLoneliness,
+                        SizedBox(height: 40),
+                        Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            ElevatedButton(
+                              onPressed: () {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) => RecommendationPage(
+                                      depressionScore: _scoreDepression,
+                                      anxietyScore: _scoreAnxiety,
+                                      lonelinessScore: _scoreLoneliness,
+                                    ),
+                                  ),
+                                );
+                              },
+                              child: Text(
+                                "Ver recomendaciones con respuesta mecánica",
+                                style: TextStyle(
+                                  fontSize: 15,
                                 ),
                               ),
-                            );
-                          },
-                          child: Text(
-                            "Ver recomendaciones con respuesta IA",
-                            style: TextStyle(
-                              fontSize: 15,
                             ),
+                            SizedBox(width: 20), // espacio entre botones
+                            ElevatedButton(
+                              onPressed: () {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) => LLMRecommendationPage(
+                                      depressionScore: _scoreDepression,
+                                      anxietyScore: _scoreAnxiety,
+                                      lonelinessScore: _scoreLoneliness,
+                                    ),
+                                  ),
+                                );
+                              },
+                              child: Text(
+                                "Ver recomendaciones con respuesta IA",
+                                style: TextStyle(
+                                  fontSize: 15,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                        SizedBox(height: 30),
+                        ElevatedButton(
+                          onPressed: () {
+                            Navigator.pop(context); // Regresar a GeneratorPage
+                            setState(() {
+                              _isCompleted = false;
+                              //_currentQuestionIndex = 0;
+                              _scoreDepression = 0;
+                              _scoreAnxiety = 0;
+                              _scoreLoneliness = 0;
+                            });
+                          },
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor:
+                                Colors.deepPurple.shade200.withOpacity(0.8),
                           ),
+                          child: Text("Volver a la página principal",
+                              style: TextStyle(
+                                  fontSize: 15,
+                                  color:
+                                      Theme.of(context).colorScheme.onPrimary)),
                         ),
                       ],
                     ),
-                    SizedBox(height: 30),
-                    ElevatedButton(
-                      onPressed: () {
-                        Navigator.pop(context); // Regresar a GeneratorPage
-                        setState(() {
-                          _isCompleted = false;
-                          //_currentQuestionIndex = 0;
-                          _scoreDepression = 0;
-                          _scoreAnxiety = 0;
-                          _scoreLoneliness = 0;
-                        });
-                      },
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor:
-                            Colors.deepPurple.shade200.withOpacity(0.8),
+                  )
+
+                // Si no ha terminado el cuestionario
+                : Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      // Widget BigCard que muestra la pregunta actual
+                      Center(
+                        child: BigCard(
+                            question: _questions[_currentIndex].pregunta),
                       ),
-                      child: Text("Volver a la página principal",
+
+                      SizedBox(height: 20),
+
+                      // Opciones con botones de radio
+                      ..._questions[_currentIndex].opciones.map((opcion) {
+                        return Padding(
+                          padding: const EdgeInsets.symmetric(vertical: 8.0),
+                          child: Row(
+                            mainAxisSize:
+                                MainAxisSize.min, // sólo el ancho necesario
+                            mainAxisAlignment:
+                                MainAxisAlignment.center, // centra la fila
+                            crossAxisAlignment: CrossAxisAlignment.center,
+                            children: [
+                              Radio<String>(
+                                value: opcion,
+                                groupValue: _selectedOption,
+                                onChanged: (value) {
+                                  setState(() {
+                                    _selectedOption = value;
+                                  });
+                                },
+                              ),
+                              SizedBox(
+                                  width: 12), // espacio entre radio y texto
+                              Text(
+                                opcion,
+                                style: TextStyle(
+                                  color:
+                                      Theme.of(context).colorScheme.onPrimary,
+                                  fontSize: 16,
+                                ),
+                              ),
+                            ],
+                          ),
+                        );
+                      }).toList(),
+
+                      SizedBox(height: 20),
+                      ElevatedButton(
+                        onPressed:
+                            _selectedOption != null ? _nextQuestion : null,
+                        child: Text(
+                          _currentIndex < _questions.length - 1
+                              ? "Siguiente"
+                              : "Finalizar",
                           style: TextStyle(
-                              fontSize: 15,
-                              color: Theme.of(context).colorScheme.onPrimary)),
-                    ),
-                  ],
-                ),
-              )
-
-            // Si no ha terminado el cuestionario
-            : Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  // Widget BigCard que muestra la pregunta actual
-                  Center(
-                    child:
-                        BigCard(question: _questions[_currentIndex].pregunta),
-                  ),
-
-                  SizedBox(height: 20),
-
-                  // Opciones con botones de radio
-                  ..._questions[_currentIndex].opciones.map((opcion) {
-                    return Padding(
-                      padding: const EdgeInsets.symmetric(vertical: 8.0),
-                      child: Row(
-                        mainAxisSize:
-                            MainAxisSize.min, // sólo el ancho necesario
-                        mainAxisAlignment:
-                            MainAxisAlignment.center, // centra la fila
-                        crossAxisAlignment: CrossAxisAlignment.center,
-                        children: [
-                          Radio<String>(
-                            value: opcion,
-                            groupValue: _selectedOption,
-                            onChanged: (value) {
-                              setState(() {
-                                _selectedOption = value;
-                              });
-                            },
+                            fontSize: 15,
                           ),
-                          SizedBox(width: 12), // espacio entre radio y texto
-                          Text(
-                            opcion,
-                            style: TextStyle(
-                              color: Theme.of(context)
-                                  .colorScheme
-                                  .primaryContainer,
-                              fontSize: 16,
-                            ),
-                          ),
-                        ],
+                        ),
                       ),
-                    );
-                  }).toList(),
-
-                  SizedBox(height: 20),
-                  ElevatedButton(
-                    onPressed: _selectedOption != null ? _nextQuestion : null,
-                    child: Text(
-                      _currentIndex < _questions.length - 1
-                          ? "Siguiente"
-                          : "Finalizar",
-                      style: TextStyle(
-                        fontSize: 15,
-                      ),
-                    ),
+                    ],
                   ),
-                ],
-              ),
+          ),
+        ),
       ),
     );
   }

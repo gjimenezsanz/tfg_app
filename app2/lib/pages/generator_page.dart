@@ -7,22 +7,33 @@ class GeneratorPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color.fromARGB(255, 0, 29, 49),
-      body: SafeArea(
-        child: SingleChildScrollView(
-          // 🔥 Solución: permite hacer scroll si el contenido es grande
-          child: Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: Column(
-              children: [
-                _buildHeader(),
-                SizedBox(height: 20),
-                MoodTracker(),
-                SizedBox(height: 20),
-                _CarouselCard(),
-                SizedBox(height: 60),
-                _cuestionarioSemanal(context),
-              ],
+      //backgroundColor: const Color.fromARGB(255, 0, 29, 49),
+      // Widget: SizedBox : Ocupa todo el espacio disponible
+      // Widget Container : permite superponer widgets: imagen fonfo + contenido encima
+      body: SizedBox.expand(
+        child: Container(
+          decoration: BoxDecoration(
+            image: DecorationImage(
+              image: AssetImage('assets/images/fondo1.jpg'),
+              fit: BoxFit.cover,
+            ),
+          ),
+          child: SafeArea(
+            child: SingleChildScrollView(
+              child: Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: Column(
+                  children: [
+                    _buildHeader(),
+                    SizedBox(height: 20),
+                    MoodTracker(),
+                    SizedBox(height: 20),
+                    _CarouselCard(),
+                    SizedBox(height: 60),
+                    _cuestionarioSemanal(context),
+                  ],
+                ),
+              ),
             ),
           ),
         ),

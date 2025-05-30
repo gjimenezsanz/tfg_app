@@ -60,88 +60,114 @@ class _RecommendationPageState extends State<LLMRecommendationPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text("Recomendaciones de IA"),
-        backgroundColor: Colors.black,
-        titleTextStyle: TextStyle(
-            fontSize: 20,
-            fontWeight: FontWeight.bold,
-            color: Theme.of(context).colorScheme.primaryContainer),
+      appBar: PreferredSize(
+        preferredSize: Size.fromHeight(kToolbarHeight),
+        child: Container(
+          // Contenedor para el AppBar con fondo con imagen
+          decoration: BoxDecoration(
+            image: DecorationImage(
+              image: AssetImage('assets/images/fondo2.jpg'),
+              fit: BoxFit.cover,
+            ),
+          ),
+          child: AppBar(
+            title: Text("Recomendaciones de IA"),
+            backgroundColor: Colors.transparent,
+            titleTextStyle: TextStyle(
+              fontSize: 25,
+              fontWeight: FontWeight.bold,
+              color: Theme.of(context).colorScheme.primaryContainer,
+            ),
+          ),
+        ),
       ),
-      backgroundColor: const Color.fromARGB(255, 0, 15, 49),
-      body: Padding(
-        padding: EdgeInsets.all(16.0),
-        child: Center(
-          child: _isLoading //Cuando la petición está en curso
-              ? const CircularProgressIndicator() // Spinner de carga
-              : _error != null
-                  ? Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Text(
-                          _error!,
-                          style: TextStyle(
-                            color: Theme.of(context).colorScheme.error,
-                          ),
-                        ),
-                        const SizedBox(height: 20),
-                        ElevatedButton(
-                          onPressed: _fetchRecommendation,
-                          child: const Text('Reintentar'),
-                        ),
-                      ],
-                    )
-                  : Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        const Text(
-                          'Aquí tienes tus recomendaciones:',
-                          style: TextStyle(
-                            fontSize: 20,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.white,
-                          ),
-                        ),
-                        const SizedBox(height: 12),
-                        Expanded(
-                          child: SingleChildScrollView(
-                            child: Text(
-                              _recommendation ?? '',
-                              style: const TextStyle(
-                                fontSize: 16,
-                                color: Colors.white70,
+
+      //backgroundColor: const Color.fromARGB(255, 0, 15, 49),
+      body: SizedBox.expand(
+        child: Container(
+          decoration: BoxDecoration(
+            image: DecorationImage(
+              image: AssetImage('assets/images/fondo1.jpg'),
+              fit: BoxFit.cover,
+            ),
+          ),
+          child: Padding(
+            padding: EdgeInsets.all(16.0),
+            child: Center(
+              child: _isLoading //Cuando la petición está en curso
+                  ? const CircularProgressIndicator() // Spinner de carga
+                  : _error != null
+                      ? Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Text(
+                              _error!,
+                              style: TextStyle(
+                                color: Theme.of(context).colorScheme.error,
                               ),
                             ),
-                          ),
-                        ),
-                        const SizedBox(height: 16),
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
+                            const SizedBox(height: 20),
                             ElevatedButton(
                               onPressed: _fetchRecommendation,
-                              child: const Text('Actualizar Recomendaciones'),
+                              child: const Text('Reintentar'),
                             ),
-                            SizedBox(width: 20), // espacio entre botones
-                            ElevatedButton(
-                              onPressed: () => Navigator.pop(context),
-                              style: ElevatedButton.styleFrom(
-                                backgroundColor:
-                                    Colors.deepPurple.shade200.withOpacity(0.8),
+                          ],
+                        )
+                      : Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            const Text(
+                              'Aquí tienes tus recomendaciones:',
+                              style: TextStyle(
+                                fontSize: 20,
+                                fontWeight: FontWeight.bold,
+                                color: Colors.white,
                               ),
-                              child: Text(
-                                'Volver',
-                                style: TextStyle(
-                                  color:
-                                      Theme.of(context).colorScheme.onPrimary,
+                            ),
+                            const SizedBox(height: 12),
+                            Expanded(
+                              child: SingleChildScrollView(
+                                child: Text(
+                                  _recommendation ?? '',
+                                  style: const TextStyle(
+                                    fontSize: 16,
+                                    color: Colors.white70,
+                                  ),
                                 ),
-                                textAlign: TextAlign.center,
                               ),
+                            ),
+                            const SizedBox(height: 16),
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                ElevatedButton(
+                                  onPressed: _fetchRecommendation,
+                                  child:
+                                      const Text('Actualizar Recomendaciones'),
+                                ),
+                                SizedBox(width: 20), // espacio entre botones
+                                ElevatedButton(
+                                  onPressed: () => Navigator.pop(context),
+                                  style: ElevatedButton.styleFrom(
+                                    backgroundColor: Colors.deepPurple.shade200
+                                        .withOpacity(0.8),
+                                  ),
+                                  child: Text(
+                                    'Volver',
+                                    style: TextStyle(
+                                      color: Theme.of(context)
+                                          .colorScheme
+                                          .onPrimary,
+                                    ),
+                                    textAlign: TextAlign.center,
+                                  ),
+                                ),
+                              ],
                             ),
                           ],
                         ),
-                      ],
-                    ),
+            ),
+          ),
         ),
       ),
     );

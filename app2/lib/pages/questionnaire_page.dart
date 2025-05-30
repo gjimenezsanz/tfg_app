@@ -178,6 +178,8 @@ class _QuestionPageState extends State<QuestionPage> {
         appBar: AppBar(
           title: Text("Cuestionario"),
           backgroundColor: Colors.black,
+          iconTheme: IconThemeData(
+              color: Theme.of(context).colorScheme.primaryContainer),
         ),
         body: Center(child: CircularProgressIndicator()), // Spinner de carga
       );
@@ -386,8 +388,8 @@ class BigCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Card(
-      //color: Colors.deepPurple.shade200,
-      color: Theme.of(context).colorScheme.primary,
+      //color: Theme.of(context).colorScheme.primary,
+      color: Colors.deepPurple.shade200.withOpacity(0.8),
 
       child: Padding(
         padding: const EdgeInsets.all(20),

@@ -49,34 +49,43 @@ class _MyHomePageState extends State<MyHomePage> {
             return Column(
               children: [
                 Expanded(child: mainArea),
-                SafeArea(
-                  child: BottomNavigationBar(
-                    items: [
-                      BottomNavigationBarItem(
-                        icon: Icon(Icons.home_rounded),
-                        label: 'Home',
-                      ),
-                      BottomNavigationBarItem(
-                        icon: Icon(Icons.stacked_bar_chart),
-                        label: 'Statics',
-                      ),
-                      BottomNavigationBarItem(
-                        icon: Icon(Icons.person_rounded),
-                        label: 'User',
-                      ),
-                    ],
-                    backgroundColor: Colors.black,
-                    selectedItemColor: Colors.white,
-                    unselectedItemColor: Colors.grey,
-                    selectedIconTheme: IconThemeData(color: Colors.white),
-                    unselectedIconTheme: IconThemeData(color: Colors.grey),
-                    currentIndex: selectedIndex, //home
-                    onTap: (value) {
-                      setState(() {
-                        //clase que notifica del cambio de estado
-                        selectedIndex = value;
-                      });
-                    },
+                Container(
+                  // Ponemos la imagen de fondo aquí
+                  decoration: BoxDecoration(
+                    image: DecorationImage(
+                      image: AssetImage('assets/images/fondo2.jpg'),
+                      fit: BoxFit.cover,
+                    ),
+                  ),
+                  child: SafeArea(
+                    child: BottomNavigationBar(
+                      items: [
+                        BottomNavigationBarItem(
+                          icon: Icon(Icons.home_rounded),
+                          label: 'Home',
+                        ),
+                        BottomNavigationBarItem(
+                          icon: Icon(Icons.stacked_bar_chart),
+                          label: 'Statics',
+                        ),
+                        BottomNavigationBarItem(
+                          icon: Icon(Icons.person_rounded),
+                          label: 'User',
+                        ),
+                      ],
+                      backgroundColor: Colors.transparent,
+                      selectedItemColor: Colors.white,
+                      unselectedItemColor: Colors.grey,
+                      selectedIconTheme: IconThemeData(color: Colors.white),
+                      unselectedIconTheme: IconThemeData(color: Colors.grey),
+                      currentIndex: selectedIndex, //home
+                      onTap: (value) {
+                        setState(() {
+                          //clase que notifica del cambio de estado
+                          selectedIndex = value;
+                        });
+                      },
+                    ),
                   ),
                 )
               ],
@@ -146,7 +155,7 @@ class _MyHomePageState extends State<MyHomePage> {
                   MaterialPageRoute(builder: (context) => ChatPage()),
                 );
               },
-              backgroundColor: Colors.cyan.shade600,
+              backgroundColor: Colors.cyan.shade700,
               foregroundColor: colorScheme.onPrimary,
               shape: const CircleBorder(),
               tooltip: 'Chat with me!',

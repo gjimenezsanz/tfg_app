@@ -39,6 +39,21 @@ class MyApp extends StatelessWidget {
           useMaterial3: true,
           colorScheme: ColorScheme.fromSeed(
               seedColor: const Color.fromARGB(255, 29, 20, 127)),
+          appBarTheme: AppBarTheme(
+            // Color de tu flecha “back”
+            iconTheme: IconThemeData(
+              color: Theme.of(context).colorScheme.primaryContainer,
+            ),
+          ),
+          // Color botones cuestinarios
+          radioTheme: RadioThemeData(
+            fillColor: WidgetStateProperty.resolveWith((states) {
+              if (states.contains(WidgetState.selected)) {
+                return Theme.of(context).colorScheme.primaryContainer;
+              }
+              return Colors.white70;
+            }),
+          ),
         ),
         home: MyHomePage(),
       ),

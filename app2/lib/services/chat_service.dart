@@ -11,7 +11,7 @@ class ChatService {
   //final String referer = '<url>'; // Opcional
   //final String title = '<title>'; // Opcional
 
-  Future<String> sendMessage(String message) async {
+  Future<ChatResult> sendMessage(String message) async {
     String getBackendUrl() {
       if (kIsWeb) {
         return 'https://openrouter.ai/api/v1/chat/completions'; //endpoint de OpenRouter: url para peticiones POST
@@ -39,7 +39,7 @@ class ChatService {
         {
           "role": "system",
           "content":
-              '''Act as 'MindCare', a specialized mental health assistant for university students. Your purpose is to provide a supportive, confidential space for students dealing with academic stress, anxiety, depression, loneliness, and sleep issues.
+              '''Act as specialized mental health assistant for university students. Your purpose is to provide a supportive, confidential space for students dealing with academic stress, anxiety, depression, loneliness, and sleep issues.
 
           APPROACH:
           - Create a warm, empathetic environment where students feel safe sharing their concerns
@@ -60,7 +60,25 @@ class ChatService {
           - Encourage healthy lifestyle habits (sleep, nutrition, exercise, social connection) that support mental wellbeing
           - When appropriate, suggest seeking professional help
 
-          Always prioritize student safety. If they express thoughts of self-harm, strongly encourage them to contact emergency services immediately.'''
+          Always prioritize student safety. If they express thoughts of self-harm, strongly encourage them to contact emergency services immediately.
+    
+        You are a mental health assistant. When producing user recommendations, also analyze your response and detect any indications of anxiety, depression, or loneliness. At the end of your reply, output a JSON object exactly like:
+          {
+            "flags": [
+              {"type": "anxiety",    "snippet": "<exact sentence indicating anxiety>"},
+              {"type": "depression", "snippet": "<exact sentence indicating depression>"},
+              {"type": "loneliness", "snippet": "<exact sentence indicating loneliness>"}
+            ]
+          }
+
+          If you find no sentence indicating any of these conditions, output:
+          {
+            "flags": []
+          }
+
+          Do NOT output a flag with type "none" or snippet "None". Only include entries in the array when a genuine snippet is found.
+
+          '''
         },
         {
           //Prompt del usuario ---> IA a modificar
@@ -69,32 +87,80 @@ class ChatService {
         }
       ]
     });
-
     try {
-      // Intenta realizar la petición POST
-      final response =
-          await http.post(url, headers: headers, body: body); // Petición POST
-
-      final data = json.decode(response.body); // Decodifica la respuesta JSON
-      print("🧠 JSON recibido: $data"); // Imprime el JSON recibido
-
-      // Si la respuesta es correcta
-      if (response.statusCode == 200) {
-        final data = json.decode(response.body);
-        if (data['choices'] != null && data['choices'].isNotEmpty) {
-          return data['choices'][0]['message']['content'] ??
-              'No response content';
-        } else {
-          return 'No choices found in the response';
-        }
-      } else {
-        // Si la respuesta es incorrecta
-        return 'Error: ${response.statusCode}, ${response.body}';
+      final response = await http.post(url, headers: headers, body: body);
+      if (response.statusCode != 200) {
+        throw Exception('Error ${response.statusCode}: ${response.body}');
       }
+
+      final data = json.decode(response.body);
+
+      // Extraer la respuesta completa de la IA
+      final fullReply = data['choices'][0]['message']['content'] as String;
+
+      // Separa recomendaciones vs JSON de flags
+      // Divide el texto en dos partes: recomendaciones y bloque JSON. Tras el salto de linea empieza el JSON
+      final parts = fullReply.split(RegExp(r'\n\{', multiLine: true));
+      // La primera parte contiene el texto de recomendaciones
+      final recommendationsText = parts.first.trim();
+      // La segunda parte contiene el bloque JSON de flags, se le añade { para que sea un JSON válido
+      final jsonText = '{' + parts.last.trim();
+
+      // Parsear el bloque JSON de flags
+      Map<String, dynamic> flagsBlock;
+      try {
+        // Decodificar el JSON: texto a mapa
+        //Key: flags
+        flagsBlock = json.decode(jsonText) as Map<String, dynamic>;
+      } catch (_) {
+        // Si falla: devuelve un bloque vacío
+        flagsBlock = {'flags': []};
+      }
+      // Convertir Map a lista de mapas:
+      //  flagsBlock['flags'] accedemos al Value de flag, y comprobamos que sea una lista
+      // Cada flag es un mapa con => "type" y "snippet"
+      /*  for (var map in flags) {
+            String tipo = map['type'];
+            String fragmento = map['snippet'];
+            ...
+          }
+      // Ejemplo de JSON respuesta de la IA:
+          {
+            "flags": [
+              {"type": "anxiety", "snippet": "I feel overwhelmed with my studies."},
+              {"type": "depression", "snippet": "I have lost interest in my hobbies."}
+            ]
+          }
+      */
+      final flags =
+          (flagsBlock['flags'] as List<dynamic>).cast<Map<String, dynamic>>();
+
+      // Devolver objeto estructurado: recomendaciones y mapa de flags
+      return ChatResult(
+        text: recommendationsText, // Texto de recomendaciones
+        flags: flags.map((m) => Flag.fromMap(m)).toList(), // Lista de flags
+      );
     } catch (e) {
-      // Manejo de errores si la petición falla
       print("Error en la petición: $e");
-      return "Error al conectarse a la IA.";
+      return ChatResult(text: "Error al conectarse a la IA.", flags: []);
     }
   }
+}
+
+// Clase para almacenar el resultado de la conversación con la IA :
+//  text (lo que muestras en pantalla) y flags (lo que guardas en Firebase o Hive)
+class ChatResult {
+  final String text; //texto de recomendaciones
+  final List<Flag> flags; //lista de Flag(type, snippet)
+  ChatResult({required this.text, required this.flags});
+}
+
+class Flag {
+  final String type;
+  final String snippet;
+  Flag({required this.type, required this.snippet});
+  factory Flag.fromMap(Map<String, dynamic> m) => Flag(
+        type: m['type'] as String,
+        snippet: m['snippet'] as String,
+      );
 }

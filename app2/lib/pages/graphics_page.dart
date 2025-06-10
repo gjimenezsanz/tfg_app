@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:fl_chart/fl_chart.dart';
-import 'recommendation_page.dart';
+import 'recommendations/recommendation_page.dart';
+import 'recommendations/llmrecommend_page.dart';
 
 class GraphicPage extends StatefulWidget {
   @override
@@ -90,6 +91,7 @@ class _GraphicPageState extends State<GraphicPage> {
 
   Widget _buildChart(String title, List<FlSpot> data, Color color) {
     return Card(
+      color: Colors.white.withOpacity(0.2),
       elevation: 4,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
       margin: EdgeInsets.all(10),
@@ -146,7 +148,27 @@ class _GraphicPageState extends State<GraphicPage> {
   Widget build(BuildContext context) {
     var colorScheme = Theme.of(context).colorScheme;
     return Scaffold(
-      appBar: AppBar(title: Text("Progreso Semanal")),
+      appBar: PreferredSize(
+        preferredSize: Size.fromHeight(kToolbarHeight),
+        child: Container(
+          // Contenedor para el AppBar con fondo con imagen
+          decoration: BoxDecoration(
+            image: DecorationImage(
+              image: AssetImage('assets/images/fondo2.jpg'),
+              fit: BoxFit.cover,
+            ),
+          ),
+          child: AppBar(
+            title: Text("Weekly Progress"),
+            backgroundColor: Colors.transparent,
+            titleTextStyle: TextStyle(
+              fontSize: 25,
+              fontWeight: FontWeight.bold,
+              color: Theme.of(context).colorScheme.primaryContainer,
+            ),
+          ),
+        ),
+      ),
       body: SizedBox.expand(
         child: Container(
           decoration: BoxDecoration(
@@ -169,7 +191,7 @@ class _GraphicPageState extends State<GraphicPage> {
         ),
       ),
       floatingActionButton: Padding(
-        //boton flotante recomendaciones ---> a arreglar
+        // Botón flotante recomendaciones
         padding: const EdgeInsets.all(25),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.start,
@@ -194,7 +216,28 @@ class _GraphicPageState extends State<GraphicPage> {
                   foregroundColor: colorScheme.onPrimary,
                   shape: const CircleBorder(),
                   tooltip: 'Check out the recommendations!',
-                  child: const Icon(Icons.sms_outlined),
+                  child: const Icon(Icons.dataset_outlined),
+                ),
+                SizedBox(height: 10), // Espaciado entre botones
+                FloatingActionButton(
+                  onPressed: () {
+                    // Redirige a la página LLMRecommendationPage usando Navigator
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => LLMRecommendationPage(
+                          depressionScore: 0,
+                          anxietyScore: 0,
+                          lonelinessScore: 0,
+                        ),
+                      ),
+                    );
+                  },
+                  backgroundColor: colorScheme.primary,
+                  foregroundColor: colorScheme.onPrimary,
+                  shape: const CircleBorder(),
+                  tooltip: 'Check out the IA recommendations!',
+                  child: const Icon(Icons.memory_outlined),
                 ),
               ],
             ),

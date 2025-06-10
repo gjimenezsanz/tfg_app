@@ -55,7 +55,7 @@ Widget _buildHeader() {
       Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text("¡Hola de nuevo!",
+          Text("Hi Again!",
               style: TextStyle(
                   fontSize: 22,
                   color: Colors.white,
@@ -83,6 +83,7 @@ class _MoodTrackerState extends State<MoodTracker> {
 
   @override
   Widget build(BuildContext context) {
+    final sessionRef = context.read<MyAppState>().sessionRef;
     MoodStatus moodStatus = _getMoodStatus(moodLevel); // Estado de ánimo actual
 
     return Column(
@@ -149,34 +150,38 @@ class _MoodTrackerState extends State<MoodTracker> {
               splashColor: Colors.white.withOpacity(0.9),
               highlightColor: Colors.white.withOpacity(0.2),
               tooltip: 'Guardar tu estado de ánimo',
-              onPressed: () async {
-                // Guarda mood + valor + timestamp en Firestore
-                await FirebaseFirestore.instance.collection('moods').add({
-                  'mood': moodStatus.label,
-                  'value': moodLevel,
-                  'timestamp': FieldValue.serverTimestamp(),
-                });
-                // Muestra un mensaje emergente de confirmación
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(
-                    backgroundColor:
-                        Colors.deepPurple.shade200.withOpacity(0.55),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    duration: Duration(milliseconds: 400),
-                    content: Center(
-                      child: Text(
-                        'Tu estado "${moodStatus.label}" ha sido guardado',
-                        style: TextStyle(
-                          color: Colors.grey.shade200,
-                          fontSize: 15,
+              onPressed: sessionRef != null
+                  ? () async {
+                      // Guarda mood + valor + timestamp en Firestore
+                      await sessionRef.update({
+                        "mood": {
+                          "moodLabel": moodStatus.label,
+                          "value": moodLevel,
+                        },
+                        "timestamp": FieldValue.serverTimestamp(),
+                      });
+                      // Muestra un mensaje emergente de confirmación
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          backgroundColor:
+                              Colors.deepPurple.shade200.withOpacity(0.55),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          duration: Duration(milliseconds: 400),
+                          content: Center(
+                            child: Text(
+                              'Tu estado "${moodStatus.label}" ha sido guardado',
+                              style: TextStyle(
+                                color: Colors.grey.shade200,
+                                fontSize: 15,
+                              ),
+                            ),
+                          ),
                         ),
-                      ),
-                    ),
-                  ),
-                );
-              },
+                      );
+                    }
+                  : null,
             ),
           ],
         ),
@@ -348,7 +353,7 @@ Widget _cuestionarioSemanal(BuildContext context) {
                     fontWeight: FontWeight.bold,
                     fontSize: 18)),
             SizedBox(height: 5),
-            Text("Realiza tu seguimiento psicológico",
+            Text("Take this test for a psychological follow-up",
                 style: TextStyle(color: Colors.white70)),
           ],
         ),

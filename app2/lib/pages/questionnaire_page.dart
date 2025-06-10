@@ -1,10 +1,12 @@
 import 'dart:convert';
+import 'package:provider/provider.dart'; // Importa Provider para manejar el estado para sessionRef
+import 'package:app2/main.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:app2/models/question.dart';
-import 'recommendation_page.dart';
-import 'llmrecommend_page.dart';
+import 'recommendations/recommendation_page.dart';
+import 'recommendations/llmrecommend_page.dart';
 
 class QuestionPage extends StatefulWidget {
   @override
@@ -134,15 +136,23 @@ class _QuestionPageState extends State<QuestionPage> {
   }
 
   // Guarda los puntajes finales en Firebase
-  Future<void> _saveFinalScores() {
-    return FirebaseFirestore.instance
-        .collection("resultados") // o "respuestas_resumen"
-        .add({
-      "scoreDepression": _scoreDepression,
-      "scoreAnxiety": _scoreAnxiety,
-      "scoreLoneliness": _scoreLoneliness,
-      "timestamp": FieldValue.serverTimestamp(),
-    });
+  Future<void> _saveFinalScores() async {
+    // Usa Provider.of para acceder a MyAppState
+    // Referencia a la sesión actual
+    final sessionRef = context.read<MyAppState>().sessionRef;
+    if (sessionRef != null) {
+      await sessionRef.update({
+        "scores": {
+          "scoreDepression": _scoreDepression,
+          "scoreAnxiety": _scoreAnxiety,
+          "scoreLoneliness": _scoreLoneliness,
+        },
+        'timestamp': FieldValue.serverTimestamp(), // Actualiza el timestamp
+      });
+    } else {
+      print("No hay sessionRef para guardar scores");
+    }
+    return;
   }
 
 // Método para avanzar a la siguiente pregunta
@@ -197,7 +207,7 @@ class _QuestionPageState extends State<QuestionPage> {
             ),
           ),
           child: AppBar(
-            title: Text("Cuestionario"),
+            title: Text("Questionnaire"),
             backgroundColor: Colors.transparent,
             titleTextStyle: TextStyle(
               fontSize: 25,

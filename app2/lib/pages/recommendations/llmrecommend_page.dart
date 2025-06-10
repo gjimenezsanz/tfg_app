@@ -5,6 +5,7 @@ class LLMRecommendationPage extends StatefulWidget {
   final int depressionScore;
   final int anxietyScore;
   final int lonelinessScore;
+
   LLMRecommendationPage({
     required this.depressionScore,
     required this.anxietyScore,
@@ -40,7 +41,7 @@ class _RecommendationPageState extends State<LLMRecommendationPage> {
         anxietyScore: widget.anxietyScore,
         lonelinessScore: widget.lonelinessScore,
         message:
-            'Por favor, genera recomendaciones prácticas basadas en mis resultados.',
+            'Please, generates practical recommendations based on my findings.',
       ); // Envía el prompt al LLM
       setState(() {
         _recommendation =
@@ -71,7 +72,7 @@ class _RecommendationPageState extends State<LLMRecommendationPage> {
             ),
           ),
           child: AppBar(
-            title: Text("Recomendaciones de IA"),
+            title: Text("AI Recommendations"),
             backgroundColor: Colors.transparent,
             titleTextStyle: TextStyle(
               fontSize: 25,
@@ -117,7 +118,7 @@ class _RecommendationPageState extends State<LLMRecommendationPage> {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             const Text(
-                              'Aquí tienes tus recomendaciones:',
+                              'Here are your recommendations:',
                               style: TextStyle(
                                 fontSize: 20,
                                 fontWeight: FontWeight.bold,

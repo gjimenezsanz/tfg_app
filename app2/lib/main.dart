@@ -1,10 +1,11 @@
 import 'package:app2/pages/home_page.dart';
 import 'package:english_words/english_words.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:cloud_firestore/cloud_firestore.dart'; // Para usar Firestore
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'firebase_options.dart'; // Archivo generado por flutterfire configure
+//import 'firebase_options.dart'; // Archivo generado por flutterfire configure
 
 void main() async {
   WidgetsFlutterBinding
@@ -31,24 +32,26 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // Para usar colorScheme en appBarTheme y radioTheme sin depender de Theme.of(context)
+    final colorScheme = ColorScheme.fromSeed(
+      seedColor: const Color.fromARGB(255, 29, 20, 127),
+    );
     return ChangeNotifierProvider(
       create: (context) => MyAppState(),
       child: MaterialApp(
         title: 'Namer App',
         theme: ThemeData(
           useMaterial3: true,
-          colorScheme: ColorScheme.fromSeed(
-              seedColor: const Color.fromARGB(255, 29, 20, 127)),
           appBarTheme: AppBarTheme(
-            // Color de tu flecha “back”
+            // Color de la flecha “back”
             iconTheme: IconThemeData(
               color: Theme.of(context).colorScheme.primaryContainer,
             ),
           ),
           // Color botones cuestinarios
           radioTheme: RadioThemeData(
-            fillColor: WidgetStateProperty.resolveWith((states) {
-              if (states.contains(WidgetState.selected)) {
+            fillColor: MaterialStateProperty.resolveWith((states) {
+              if (states.contains(MaterialState.selected)) {
                 return Theme.of(context).colorScheme.primaryContainer;
               }
               return Colors.white70;
@@ -62,19 +65,48 @@ class MyApp extends StatelessWidget {
 }
 
 class MyAppState extends ChangeNotifier {
-  var current = WordPair.random();
+  MyAppState() {
+    _initSession();
+  }
+  DocumentReference? _sessionRef;
+  // Getter para acceder a la referencia de sesión
+  DocumentReference? get sessionRef => _sessionRef;
+
+  Future<void> _initSession() async {
+    try {
+      // Generar un ID de sesión basado en timestamp al arrancar la app
+      final sid = DateTime.now().millisecondsSinceEpoch.toString();
+      final docRef = FirebaseFirestore.instance.collection('sessions').doc(sid);
+      _sessionRef = docRef;
+      // Crear el documento con campo timestamp inicial
+      await docRef.set({
+        'timestamp': FieldValue.serverTimestamp(),
+      });
+      print('Sesión iniciada con ID: $sid');
+      notifyListeners();
+    } catch (e) {
+      print('Error creando sesión inicial en Firestore: $e');
+    }
+  }
+
+  // Método para limpiar
+  void clearSessionRef() {
+    _sessionRef = null;
+    notifyListeners();
+  }
+
+  var current = WordPair.random(); //inicializa con un par aleatorio
   var history = <WordPair>[]; //lista historial
 
-  GlobalKey?
-      historyListKey; //accede al estado de un widget especifico, puede ser null
+  GlobalKey? historyListKey; //accede al estado de un widget especifico
 
   void getNext() {
     //boton next
     history.insert(0, current); //añade al principio de la lista history el pair
     var animatedList = historyListKey?.currentState
-        as AnimatedListState?; //obtiene el estado del widget AnimatedList y lo convierte en un AnimatedListState, puede ser null
-    animatedList?.insertItem(
-        0); //añade un nuevo elemento en la lista con animacion, puede ser null
+        as AnimatedListState?; //obtiene el estado del widget AnimatedList y lo convierte en un AnimatedListState
+    animatedList
+        ?.insertItem(0); //añade un nuevo elemento en la lista con animacion
     current = WordPair.random();
     notifyListeners();
   }

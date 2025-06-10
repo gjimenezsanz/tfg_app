@@ -18,53 +18,94 @@ class UserPage extends StatelessWidget {
             fit: BoxFit.cover,
           ),
         ),
-        child: favorites.isEmpty
-            ? Center(
-                child: Text(
-                  'No users yet.',
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 18,
-                  ),
+        child: Center(child: AlertButtom()),
+      ),
+    );
+  }
+}
+
+class AlertButtom extends StatelessWidget {
+  const AlertButtom({super.key});
+  @override
+  Widget build(BuildContext context) {
+    return TextButton(
+      onPressed: () => showDialog<String>(
+        context: context,
+        barrierDismissible:
+            false, // No permite cerrar la alerta al tocar fuera de él
+        builder: (BuildContext context) => AlertDialog(
+          insetPadding: const EdgeInsets.symmetric(
+            horizontal: 40,
+            vertical: 24,
+          ),
+          backgroundColor: Colors.deepPurple.shade200.withOpacity(0.6),
+          //backgroundColor: Colors.white.withOpacity(0.5),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(20),
+          ),
+          title: const Text(
+            'User Data Privacy',
+            style: TextStyle(
+                fontSize: 20, color: Colors.white, fontWeight: FontWeight.bold),
+            textAlign: TextAlign.center,
+          ),
+          contentPadding: const EdgeInsets.fromLTRB(
+            16, // left
+            8, // top
+            16, // right
+            8, // bottom
+          ),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Image.asset('images/privacity.png', height: 170, width: 170),
+              const SizedBox(height: 8),
+              // Envolvemos el texto en un Container para limitar el ancho
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                // Opcional: limitar ancho máximo:
+                constraints: BoxConstraints(maxWidth: 300),
+                child: const Text(
+                  'Data collected from users of this application will be used for analysis and research purposes to improve the application in future.\n\n'
+                  'We will not share your data with third parties without your consent.\n\n'
+                  'Do you consent to this data being disclosed?.',
+                  style: TextStyle(fontSize: 15, color: Colors.white),
+                  textAlign: TextAlign.center,
                 ),
-              )
-            : Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Padding(
-                    padding: const EdgeInsets.all(30),
-                    child: Text('You have '
-                        '${appState.favorites.length} users:'),
-                  ),
-                  Expanded(
-                    // Make better use of wide windows with a grid.
-                    child: GridView(
-                      gridDelegate: SliverGridDelegateWithMaxCrossAxisExtent(
-                        maxCrossAxisExtent: 400,
-                        childAspectRatio: 400 / 80,
-                      ),
-                      children: [
-                        for (var pair in appState.favorites)
-                          ListTile(
-                            leading: IconButton(
-                              icon: Icon(Icons.delete_outline,
-                                  semanticLabel: 'Delete'), //para icono
-                              color: theme.colorScheme.primary,
-                              onPressed: () {
-                                appState.removeFavorite(pair);
-                              },
-                            ),
-                            title: Text(
-                              //para texto
-                              pair.asLowerCase,
-                              semanticsLabel: pair.asPascalCase,
-                            ),
-                          ),
-                      ],
-                    ),
-                  ),
-                ],
               ),
+            ],
+          ),
+          actionsAlignment: MainAxisAlignment.center,
+          actions: <Widget>[
+            TextButton(
+              onPressed: () => Navigator.pop(context, 'Cancel'),
+              style: TextButton.styleFrom(
+                foregroundColor: Colors.white,
+                textStyle:
+                    const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+              ),
+              child: const Text('Cancel'),
+            ),
+            TextButton(
+              onPressed: () => Navigator.pop(context, 'OK'),
+              style: TextButton.styleFrom(
+                foregroundColor: Colors.white,
+                textStyle:
+                    const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+              ),
+              child: const Text('OK'),
+            ),
+          ],
+        ),
+      ),
+
+      // Botón que muestra la alerta
+      child: const Text('User Data Privacy Alert'),
+      style: TextButton.styleFrom(
+        backgroundColor: Colors.white.withOpacity(0.2),
+        foregroundColor: Colors.white,
+        padding: EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+        textStyle: TextStyle(fontSize: 15),
       ),
     );
   }

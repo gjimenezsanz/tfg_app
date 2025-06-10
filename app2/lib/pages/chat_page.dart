@@ -2,6 +2,7 @@ import "package:app2/main.dart";
 import "package:flutter/material.dart";
 import "package:provider/provider.dart";
 import 'package:app2/services/chat_service.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 class ChatPage extends StatefulWidget {
   @override
@@ -10,23 +11,88 @@ class ChatPage extends StatefulWidget {
 
 class _ChatPageState extends State<ChatPage> {
   final ChatService _chatService = ChatService();
-  final TextEditingController _controller = TextEditingController();
-  String? _response;
+  bool _isLoading = false; // Estado de carga
+  String? _error; // Para mostrar errores en la UI
+
+  final TextEditingController _controller =
+      TextEditingController(); // Controlador del campo de texto
+  String? _response; //Respuesta texto
+  List<Flag>?
+      _detectedFlags; // Lista de flags detectados => Para sacar los flagas por pantalla
 
   void _sendMessage() async {
-    // Envia el mensaje
     setState(() {
-      _response = "Pensando...";
+      _isLoading = true;
+      _error = null;
     });
+    try {
+      // Envia el mensaje: mostramos indicación de “Pensando...”
+      setState(() {
+        _response = "Pensando...";
+      });
 
-    final response = await _chatService.sendMessage(_controller.text);
+      // Envía el mensaje del usuario al servicio de chat
+      final response = await _chatService.sendMessage(_controller.text);
+      // Respuesta:
+      //  response.text: el texto de recomendaciones
+      //  response.flags: la lista de flags detectados
 
-    setState(() {
-      // Actualiza la respuesta
-      _response = response;
-    });
+      setState(() {
+        // Actualiza la respuesta en pantalla
+        _response = response.text; // Muestra el texto de recomendaciones
+        _detectedFlags = response.flags; // Guarda los flags detectados
+      });
 
-    _controller.clear(); // Limpia el campo de texto
+      // Obtener la sesión global desde MyAppState (Provider)
+      // Referencia a la sesión actual
+      final sessionRef = context.read<MyAppState>().sessionRef;
+      if (sessionRef != null) {
+        // Guardar recommendations  en Firestore
+        try {
+          await sessionRef.update({
+            'recommendations': response.text,
+            'timestamp': FieldValue.serverTimestamp(),
+          });
+        } catch (e) {
+          print('Error guardando recommendations en sesión: $e');
+        }
+        // Si hay flags, preparamos la lista de mapas para guardar en Firestore
+        if (response.flags.isNotEmpty) {
+          final Flag flag0 = response.flags.first; // Primer flag
+          try {
+            await sessionRef.update({
+              'flags': {
+                'prompt': _controller.text,
+                'snippet': flag0.snippet,
+                'type': flag0.type,
+              },
+              'timestamp': FieldValue.serverTimestamp(),
+            });
+            print('Flag guardada en sesión: ${flag0.type}');
+          } catch (e) {
+            // Manejo de errores al guardar el flag
+            print('Error guardando flag en sesión: $e');
+          }
+        } else {
+          // Si no hay flags, mostramos un mensaje
+          print('No se detectaron flags');
+        }
+      } else {
+        // Si no hay sesión activa, mostramos un mensaje
+        print('No hay sesión activa');
+      }
+      _controller.clear();
+    } catch (e) {
+      // Manejo de errores al enviar el mensaje o guardar los datos
+      print('Error enviando mensaje o guardando datos: $e');
+      setState(() {
+        _error = 'Error al comunicarse con la IA';
+      });
+    } finally {
+      setState(() {
+        _isLoading = false;
+      });
+    }
   }
 
   @override
@@ -87,7 +153,7 @@ class _ChatPageState extends State<ChatPage> {
                     children: [
                       Expanded(
                         child: TextField(
-                          controller: _controller,
+                          controller: _controller, // Texto del usuario
                           decoration: InputDecoration(
                               labelText: "Text here...",
                               labelStyle: TextStyle(

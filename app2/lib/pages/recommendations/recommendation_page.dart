@@ -58,7 +58,7 @@ class RecommendationPage extends StatelessWidget {
             ),
           ),
           child: AppBar(
-            title: Text("Recomendaciones"),
+            title: Text("Recommendations"),
             backgroundColor: Colors.transparent,
             titleTextStyle: TextStyle(
               fontSize: 25,

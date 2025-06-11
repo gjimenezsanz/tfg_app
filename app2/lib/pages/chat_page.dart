@@ -1,5 +1,7 @@
 import "package:app2/main.dart";
+import "package:app2/models/session_data.dart";
 import "package:flutter/material.dart";
+import "package:hive/hive.dart";
 import "package:provider/provider.dart";
 import 'package:app2/services/chat_service.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -25,6 +27,7 @@ class _ChatPageState extends State<ChatPage> {
       _isLoading = true;
       _error = null;
     });
+
     try {
       // Envia el mensaje: mostramos indicación de “Pensando...”
       setState(() {
@@ -46,8 +49,11 @@ class _ChatPageState extends State<ChatPage> {
       // Obtener la sesión global desde MyAppState (Provider)
       // Referencia a la sesión actual
       final sessionRef = context.read<MyAppState>().sessionRef;
-      if (sessionRef != null) {
-        // Guardar recommendations  en Firestore
+      // Obtener ID de sesión para Hive
+      final sid = sessionRef?.id;
+
+      if (sessionRef != null && sid != null) {
+        // Guardar recommendations en Firestore
         try {
           await sessionRef.update({
             'recommendations': response.text,
@@ -56,6 +62,7 @@ class _ChatPageState extends State<ChatPage> {
         } catch (e) {
           print('Error guardando recommendations en sesión: $e');
         }
+
         // Si hay flags, preparamos la lista de mapas para guardar en Firestore
         if (response.flags.isNotEmpty) {
           final Flag flag0 = response.flags.first; // Primer flag
@@ -73,6 +80,30 @@ class _ChatPageState extends State<ChatPage> {
             // Manejo de errores al guardar el flag
             print('Error guardando flag en sesión: $e');
           }
+
+          // Guardar en Hive
+          var box = Hive.box<SessionData>('sessionsBox');
+          final local = box.get(sid); // Obtiene la sesión local
+          // Si ya existe, actualizamos la flag
+          final newFlagData = FlagData(
+            prompt: _controller.text,
+            snippet: flag0.snippet,
+            type: flag0.type,
+          );
+          if (local != null) {
+            local.flag = newFlagData;
+            local.recommendations = response.text;
+            local.timestamp = DateTime.now();
+            await local.save();
+          } else {
+            // Si no existe, creamos sessionData y guardamos:
+            final sessionData = SessionData(
+              timestamp: DateTime.now(),
+              recommendations: response.text,
+              flag: newFlagData,
+            );
+            await box.put(sid, sessionData);
+          }
         } else {
           // Si no hay flags, mostramos un mensaje
           print('No se detectaron flags');
@@ -81,6 +112,8 @@ class _ChatPageState extends State<ChatPage> {
         // Si no hay sesión activa, mostramos un mensaje
         print('No hay sesión activa');
       }
+
+      // Limpia el campo de texto
       _controller.clear();
     } catch (e) {
       // Manejo de errores al enviar el mensaje o guardar los datos
@@ -98,82 +131,89 @@ class _ChatPageState extends State<ChatPage> {
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
+
     return Scaffold(
-        appBar: PreferredSize(
-          preferredSize: Size.fromHeight(kToolbarHeight),
-          child: Container(
-            // Ponemos la imagen de fondo aquí
-            decoration: BoxDecoration(
-              image: DecorationImage(
-                image: AssetImage('assets/images/fondo2.jpg'),
-                fit: BoxFit.cover,
-              ),
+      appBar: PreferredSize(
+        preferredSize: Size.fromHeight(kToolbarHeight),
+        child: Container(
+          // Ponemos la imagen de fondo aquí
+          decoration: BoxDecoration(
+            image: DecorationImage(
+              image: AssetImage('assets/images/fondo2.jpg'),
+              fit: BoxFit.cover,
             ),
-            child: AppBar(
-              title: Text("Assistant Chat"),
-              backgroundColor: Colors.transparent,
-              titleTextStyle: TextStyle(
-                fontSize: 25,
-                fontWeight: FontWeight.bold,
-                color: Theme.of(context).colorScheme.primaryContainer,
-              ),
+          ),
+          child: AppBar(
+            title: Text("Assistant Chat"),
+            backgroundColor: Colors.transparent,
+            titleTextStyle: TextStyle(
+              fontSize: 25,
+              fontWeight: FontWeight.bold,
+              color: colorScheme.primaryContainer,
             ),
           ),
         ),
-        body: SizedBox.expand(
-          child: Container(
-            decoration: BoxDecoration(
-              image: DecorationImage(
-                image: AssetImage('assets/images/fondo1.jpg'),
-                fit: BoxFit.cover,
-              ),
-            ),
-            child: Column(
-              children: [
-                Expanded(
-                  child: Center(
-                    child: _response == null
-                        ? Text(
-                            "Writte a message to start a conversation with your assistant",
-                            style: TextStyle(
-                                fontSize: 18,
-                                color: colorScheme.onPrimary,
-                                fontStyle: FontStyle.italic),
-                          )
-                        : Text(
-                            _response!,
-                            style: TextStyle(
-                                fontSize: 18, color: colorScheme.onPrimary),
-                          ),
-                  ),
-                ),
-                Padding(
-                  padding: EdgeInsets.all(8.0),
-                  child: Row(
-                    children: [
-                      Expanded(
-                        child: TextField(
-                          controller: _controller, // Texto del usuario
-                          decoration: InputDecoration(
-                              labelText: "Text here...",
-                              labelStyle: TextStyle(
-                                  color: colorScheme.primaryContainer,
-                                  fontSize: 18)),
-                          style: TextStyle(color: colorScheme.primaryContainer),
-                        ),
-                      ),
-                      IconButton(
-                        icon: Icon(Icons.send),
-                        color: colorScheme.primary,
-                        onPressed:
-                            _sendMessage, // Envía el mensaje al presionar el botón
-                      ),
-                    ],
-                  ),
-                ),
-              ],
+      ),
+      body: SizedBox.expand(
+        child: Container(
+          decoration: BoxDecoration(
+            image: DecorationImage(
+              image: AssetImage('assets/images/fondo1.jpg'),
+              fit: BoxFit.cover,
             ),
           ),
-        ));
+          child: Column(
+            children: [
+              Expanded(
+                child: Center(
+                  child: _response == null
+                      ? Text(
+                          "Writte a message to start a conversation with your assistant",
+                          style: TextStyle(
+                            fontSize: 18,
+                            color: colorScheme.onPrimary,
+                            fontStyle: FontStyle.italic,
+                          ),
+                        )
+                      : Text(
+                          _response!,
+                          style: TextStyle(
+                            fontSize: 18,
+                            color: colorScheme.onPrimary,
+                          ),
+                        ),
+                ),
+              ),
+              Padding(
+                padding: EdgeInsets.all(8.0),
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: TextField(
+                        controller: _controller, // Texto del usuario
+                        decoration: InputDecoration(
+                          labelText: "Text here...",
+                          labelStyle: TextStyle(
+                            color: colorScheme.primaryContainer,
+                            fontSize: 18,
+                          ),
+                        ),
+                        style: TextStyle(color: colorScheme.primaryContainer),
+                      ),
+                    ),
+                    IconButton(
+                      icon: Icon(Icons.send),
+                      color: colorScheme.primary,
+                      onPressed:
+                          _sendMessage, // Envía el mensaje al presionar el botón
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
   }
 }

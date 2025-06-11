@@ -1,10 +1,12 @@
 import "package:app2/main.dart";
+import "package:app2/models/session_data.dart";
 import "package:app2/pages/carrusel/carruselFeelGood_page.dart";
 import "package:app2/pages/carrusel/carruselFocus_page.dart";
 import "package:app2/pages/carrusel/carruselRelax_page.dart";
 import "package:app2/pages/carrusel/carruselSleep_page.dart";
 import 'package:cloud_firestore/cloud_firestore.dart'; // Importa Firestore
 import 'package:flutter/material.dart';
+import "package:hive/hive.dart";
 import "package:provider/provider.dart";
 import "package:app2/pages/questionnaire_page.dart";
 
@@ -83,8 +85,11 @@ class _MoodTrackerState extends State<MoodTracker> {
 
   @override
   Widget build(BuildContext context) {
+    // Referencia a la sesión actual
     final sessionRef = context.read<MyAppState>().sessionRef;
     MoodStatus moodStatus = _getMoodStatus(moodLevel); // Estado de ánimo actual
+    //Obtener ID de sesión para Hive
+    final sid = context.read<MyAppState>().sessionRef?.id;
 
     return Column(
       children: [
@@ -150,7 +155,7 @@ class _MoodTrackerState extends State<MoodTracker> {
               splashColor: Colors.white.withOpacity(0.9),
               highlightColor: Colors.white.withOpacity(0.2),
               tooltip: 'Guardar tu estado de ánimo',
-              onPressed: sessionRef != null
+              onPressed: sessionRef != null && sid != null
                   ? () async {
                       // Guarda mood + valor + timestamp en Firestore
                       await sessionRef.update({
@@ -160,6 +165,23 @@ class _MoodTrackerState extends State<MoodTracker> {
                         },
                         "timestamp": FieldValue.serverTimestamp(),
                       });
+                      // Guarda mood + valor + timestamp en Hive
+                      var box = Hive.box<SessionData>('sessionsBox');
+                      final local = box.get(sid); // Obtiene la sesión local
+                      if (local != null) {
+                        local.mood = MoodData(
+                            moodLabel: moodStatus.label, value: moodLevel);
+                        local.timestamp = DateTime.now();
+                        await local.save();
+                      } else {
+                        // Si no existe, creamos sessionData y guardamos:
+                        final sessionData = SessionData(
+                          timestamp: DateTime.now(),
+                          mood: MoodData(
+                              moodLabel: moodStatus.label, value: moodLevel),
+                        );
+                        await box.put(sid, sessionData);
+                      }
                       // Muestra un mensaje emergente de confirmación
                       ScaffoldMessenger.of(context).showSnackBar(
                         SnackBar(
@@ -239,7 +261,7 @@ Widget _CarouselCard(BuildContext context) {
                           context,
                           MaterialPageRoute(
                               builder: (context) =>
-                                  CarruselrelaxPage())); // Redirige a carruselRelax
+                                  CarruselRelaxPage())); // Redirige a carruselRelax
                       print('Has pulsado la tarjeta ${info.label}');
                       return;
                     case CardInfo.focus:
@@ -247,7 +269,7 @@ Widget _CarouselCard(BuildContext context) {
                           context,
                           MaterialPageRoute(
                               builder: (context) =>
-                                  CarruselfocusPage())); // Redirige a carruselFocus
+                                  CarruselFocusPage())); // Redirige a carruselFocus
                       print('Has pulsado la tarjeta ${info.label}');
                       return;
                     case CardInfo.sleep:
@@ -255,7 +277,7 @@ Widget _CarouselCard(BuildContext context) {
                           context,
                           MaterialPageRoute(
                               builder: (context) =>
-                                  CarruselsleepPage())); // Redirige a carruselSleep
+                                  CarruselSleepPage())); // Redirige a carruselSleep
                       print('Has pulsado la tarjeta ${info.label}');
                       return;
                     case CardInfo.feelGood:
@@ -263,7 +285,7 @@ Widget _CarouselCard(BuildContext context) {
                           context,
                           MaterialPageRoute(
                               builder: (context) =>
-                                  CarruselfeelgoodPage())); // Redirige a carruselFeelGood
+                                  CarruselFeelGoodPage())); // Redirige a carruselFeelGood
                       print('Has pulsado la tarjeta ${info.label}');
                       return;
                   }

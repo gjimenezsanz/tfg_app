@@ -14,7 +14,7 @@ class RecommendService {
   Future<String> sendMessage({
     required int depressionScore,
     required int anxietyScore,
-    required int lonelinessScore,
+    required int stressScore,
     required String message,
   }) async {
     String getBackendUrl() {
@@ -44,25 +44,30 @@ class RecommendService {
           //Prompt del sistema
           "role": "system",
           "content": '''
-             You are a mental health assistant focused on recommending techniques and activities that can improve the user's lifestyle to improve their mental health. 
-              The user has completed a questionnaire with three scores:
-              - Depression: $depressionScore
-              - Anxiety: $anxietyScore
-              - Loneliness: $lonelinessScore
+            You are a compassionate mental health assistant whose goal is to recommend lifestyle techniques and activities that help improve the user's mental health.
 
-              If the depression score is high (10 < $depressionScore < 12), you suggest counselling with a specialist in the field of depression.
-              If the depression score is medium (5 < $depressionScore < 9), suggest activities or techniques to reduce depression. 
-              If the depression score is low (0 < $depressionScore < 4), suggest activities that promote self-care. 
+            The student has completed a questionnaire with three scores:
+              - Depression: $depressionScore  
+              - Anxiety: $anxietyScore  
+              - Stress: $stressScore  
 
-              If the anxiety score is high (10 < $anxietyScore < 12), suggest more specific, professional and efficient relaxation activities or techniques, and advise to visit a specialist in the field of stress.
-              If the anxiety score is medium (5 < $anxietyScore < 9), suggest relaxation activities or techniques that promote self-care. 
-              If the anxiety score is low (0 < $anxietyScore < 4), suggest short activities that allow the user to relax such as going for a walk or simple relaxation techniques that can be done in a few minutes daily.
+            Before giving advice, do a brief scan of key symptoms according to the ‘KEY ASSESSMENT AREAS’:
+              - Depression: persistent sadness, loss of interest, excessive guilt, difficulty concentrating...  
+              - Anxiety: excessive worry, feeling overwhelmed, racing thoughts, palpitations...  
+              - Stress: muscle tension, sleep disturbances, frequent headaches, irritability...
 
-              If the loneliness score is high (12 < $lonelinessScore < 18), suggest more specific, professional, and efficient socialisation activities or techniques, advises to visit an expert to help with social isolation.
-              If the loneliness score is medium (5 < $lonelinessScore < 11), suggest activities that involve interactions with other people, or try new group activities. 
-              If the loneliness score is low (0 < $lonelinessScore < 4), suggest activities that involve interaction with another person, such as meeting a friend.
-              
-              It provides clear and specific mechanical recommendations based on these values.
+            Classify each score as:
+              - Low (0 ≤ score ≤ 7).  
+              - Medium (8 ≤ score ≤ 14)  
+              - High (15 ≤ score ≤ 21)
+
+            For each area:
+              1. **Validate** your feelings (‘I understand that it can be difficult...’).  
+              2. **Briefly explores** a relevant symptom (‘Have you noticed...?’).  
+              3. **Recommends** clear, mechanical techniques (e.g., diaphragmatic breathing, active pausing, journaling).  
+              4. **Refer** if appropriate to a professional in that area (‘If you ever feel overwhelmed or have dark thoughts, consider contacting a professional or helpline at ...’).
+
+            Always keep your tone empathetic, personalised and practical.
           '''
               .trim()
         },
@@ -82,6 +87,10 @@ class RecommendService {
       final data = json.decode(response.body); // Decodifica la respuesta JSON
       print("🧠 JSON recibido: $data"); // Imprime el JSON recibido
 
+      // Si la respuesta es un error de límite de peticiones
+      if (response.statusCode == 429) {
+        return "Has alcanzado el límite de peticiones gratuitas de hoy. Por favor inténtalo mañana.";
+      }
       // Si la respuesta es correcta
       if (response.statusCode == 200) {
         final data = json.decode(response.body);

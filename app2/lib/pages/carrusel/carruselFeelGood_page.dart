@@ -1,28 +1,88 @@
-import "package:app2/main.dart";
-import "package:flutter/material.dart";
-import "package:provider/provider.dart";
+import 'package:app2/main.dart';
+import 'package:app2/models/session_data.dart';
+import 'package:app2/services/chat_service.dart';
+//import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter/material.dart';
+import 'package:hive/hive.dart';
+import 'package:provider/provider.dart';
+import 'package:flutter_markdown/flutter_markdown.dart'; // Para mostrar texto bonito
+import 'package:url_launcher/url_launcher.dart'; // Para abrir enlaces externos
 
-class CarruselfeelgoodPage extends StatelessWidget {
+class CarruselFeelGoodPage extends StatelessWidget {
+  const CarruselFeelGoodPage({Key? key}) : super(key: key);
+
+  //Construye el prompt a partir de Hive
+  Future<String> _buildRelaxPrompt(BuildContext context) async {
+    final box = Hive.box<SessionData>('sessionsBox');
+    final sid = context.read<MyAppState>().sessionRef!.id;
+    final local = box.get(sid);
+
+    if (local != null) {
+      final mood = local.mood;
+      final scores = local.scores;
+      final flag = local.flag;
+
+      var prompt = '''
+      You are a mental health assistant for students and your goal is to help the student as much as possible to improve their mental health.
+      You are an expert in social welfare, specifically focusing on young people and students, advise them to do activities and tasks outside their studies that encourage them to go out and enjoy and socialise with friends and family, to improve their mood and well-being.
+      Activity: Feel-Good Boost
+
+      Context:
+      Based on the following parameters collected about the student, we can advise you in the best way:
+        • Mood: ${mood?.moodLabel ?? 'Unknown'} (${(mood?.value ?? 0).toStringAsFixed(2)})
+        • Scores: depression=${scores?.scoreDepression ?? 0}, anxiety=${scores?.scoreAnxiety ?? 0}, stress=${scores?.scoreStress ?? 0}
+        • Flag: ${flag != null ? flag.type : 'None'}
+    ''';
+      // Si hay un flag
+      if (flag != null) {
+        prompt += '\nDetected issue: ${flag.type} — "${flag.snippet}"\n';
+      }
+
+      // Petición de contenidos específicos para feel-good
+      prompt += '''
+        Please provide:
+        - Three mood-lifting activities
+        - Two uplifting video or audio links
+        - One suggested short journaling prompt
+        - Any useful external links
+      ''';
+
+      return prompt;
+    }
+
+    // Fallback si no hay datos locales
+    return '''
+      You are a mental health assistant for students.
+      Activity: Relaxation
+
+      Context: No local session data found.
+
+      Please provide:
+      - Three expert-backed relaxation techniques
+      - Two YouTube video URLs
+      - One illustrative image URL
+      - Any useful external links
+    ''';
+  }
+
   @override
   Widget build(BuildContext context) {
-    var theme = Theme.of(context);
-    var appState = context.watch<MyAppState>();
-    var favorites = appState.favorites;
+    final chat = ChatService();
 
     return Scaffold(
+      // AppBar con fondo
       appBar: PreferredSize(
         preferredSize: Size.fromHeight(kToolbarHeight),
         child: Container(
-          // Ponemos la imagen de fondo aquí
           decoration: BoxDecoration(
             image: DecorationImage(
               image: AssetImage('assets/images/fondo1.jpg'),
               fit: BoxFit.cover,
-              opacity: 0.9, // Ajusta la opacidad según sea necesario
+              opacity: 0.9,
             ),
           ),
           child: AppBar(
-            title: Text("Feel Good Recommendations"),
+            title: Text("Relax Recommendations"),
             backgroundColor: Colors.transparent,
             titleTextStyle: TextStyle(
               fontSize: 25,
@@ -32,61 +92,73 @@ class CarruselfeelgoodPage extends StatelessWidget {
           ),
         ),
       ),
+      // Body: fondo permanente + estados de carga + resultado
       body: Container(
-        constraints: BoxConstraints.expand(),
         decoration: BoxDecoration(
           image: DecorationImage(
             image: AssetImage('assets/images/image2.jpg'),
             fit: BoxFit.cover,
+            colorFilter: ColorFilter.mode(
+              Colors.black.withOpacity(0.4), // ajusta la opacidad a tu gusto
+              BlendMode.darken, // modo de oscurecimiento
+            ),
           ),
         ),
-        child: favorites.isEmpty
-            ? Center(
-                child: Text(
-                  'No recommendations yet.',
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 18,
+        child: FutureBuilder<String>(
+          future: _buildRelaxPrompt(context),
+          builder: (ctx, snapPrompt) {
+            if (snapPrompt.connectionState != ConnectionState.done) {
+              return Center(child: CircularProgressIndicator());
+            }
+            if (snapPrompt.hasError) {
+              return Center(
+                child: Text("Error building prompt",
+                    style: TextStyle(color: Colors.white)),
+              );
+            }
+            final prompt = snapPrompt.data!;
+
+            return FutureBuilder<ChatResult>(
+              future: chat.sendMessage(prompt),
+              builder: (ctx2, snapResp) {
+                // Mientras llega la respuesta del LLM
+                if (snapResp.connectionState != ConnectionState.done) {
+                  return Center(child: CircularProgressIndicator());
+                }
+                if (snapResp.hasError) {
+                  return Center(
+                    child: Text("Error: ${snapResp.error}",
+                        style: TextStyle(color: Colors.white)),
+                  );
+                }
+                final result = snapResp.data!;
+
+                // Mostrar el resultado del LLM con Markdown (mejor formato)
+                return Markdown(
+                  padding: EdgeInsets.all(16),
+                  data: result.text,
+                  styleSheet: MarkdownStyleSheet(
+                    p: TextStyle(color: Colors.white, fontSize: 16),
+                    h3: TextStyle(
+                        color: Colors.white,
+                        fontSize: 20,
+                        fontWeight: FontWeight.bold),
+                    listBullet: TextStyle(color: Colors.white, fontSize: 16),
+                    a: TextStyle(color: Colors.lightBlueAccent),
                   ),
-                ),
-              )
-            : Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Padding(
-                    padding: const EdgeInsets.all(30),
-                    child: Text('You have '
-                        '${appState.favorites.length} users:'),
-                  ),
-                  Expanded(
-                    // Make better use of wide windows with a grid.
-                    child: GridView(
-                      gridDelegate: SliverGridDelegateWithMaxCrossAxisExtent(
-                        maxCrossAxisExtent: 400,
-                        childAspectRatio: 400 / 80,
-                      ),
-                      children: [
-                        for (var pair in appState.favorites)
-                          ListTile(
-                            leading: IconButton(
-                              icon: Icon(Icons.delete_outline,
-                                  semanticLabel: 'Delete'), //para icono
-                              color: theme.colorScheme.primary,
-                              onPressed: () {
-                                appState.removeFavorite(pair);
-                              },
-                            ),
-                            title: Text(
-                              //para texto
-                              pair.asLowerCase,
-                              semanticsLabel: pair.asPascalCase,
-                            ),
-                          ),
-                      ],
-                    ),
-                  ),
-                ],
-              ),
+                  // Manejo de enlaces
+                  onTapLink: (text, href, title) {
+                    if (href != null) launchUrl(Uri.parse(href));
+                  },
+                  selectable: true, // permite seleccionar el texto
+                  softLineBreak: true, // permite saltos de línea suaves
+                  // elimina el fondo blanco por defecto
+                  shrinkWrap: true,
+                );
+              },
+            );
+          },
+        ),
       ),
     );
   }

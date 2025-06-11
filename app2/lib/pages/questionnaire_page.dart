@@ -1,4 +1,6 @@
 import 'dart:convert';
+import 'package:app2/models/session_data.dart';
+import 'package:hive/hive.dart';
 import 'package:provider/provider.dart'; // Importa Provider para manejar el estado para sessionRef
 import 'package:app2/main.dart';
 import 'package:flutter/material.dart';
@@ -20,7 +22,7 @@ class _QuestionPageState extends State<QuestionPage> {
   List<Question> _questions = []; // Lista de preguntas
   int _scoreDepression = 0; // Puntuación total de depresión
   int _scoreAnxiety = 0; // Puntuación total de ansiedad
-  int _scoreLoneliness = 0; // Puntuación total de soledad
+  int _scoreStress = 0; // Puntuación total de estrés
   bool _isCompleted = false; // Indica si el cuestionario ha terminado
 
   @override
@@ -55,7 +57,7 @@ class _QuestionPageState extends State<QuestionPage> {
   // Guarda la respuesta en Firebase
   void _saveResponse(Question pregunta, String respuesta) {
     // Acumula en la categoria correspondiente la puntuación
-    final score = _getScore(pregunta, respuesta);
+    final score = _getScore(respuesta);
 
     // Acumula en la categoría correspondiente
     switch (pregunta.category) {
@@ -65,8 +67,8 @@ class _QuestionPageState extends State<QuestionPage> {
       case "anxiety":
         _scoreAnxiety += score;
         break;
-      case "loneliness":
-        _scoreLoneliness += score;
+      case "stress":
+        _scoreStress += score;
         break;
     }
 
@@ -74,81 +76,63 @@ class _QuestionPageState extends State<QuestionPage> {
     print("🥇 Puntuación: $score");
     print("📈Puntaje depresión: $_scoreDepression");
     print("📈Puntaje ansiedad: $_scoreAnxiety");
-    print("📈Puntaje soledad: $_scoreLoneliness");
+    print("📈Puntaje estrés: $_scoreStress");
   }
 
-  int _getScore(Question pregunta, String respuesta) {
-    switch (pregunta.category) {
-      case "depression":
-        switch (respuesta) {
-          case "Nunca":
-            return 0;
-          case "Rara vez":
-            return 1;
-          case "A veces":
-            return 2;
-          case "Casi siempre":
-            return 3;
-        }
-        break;
-      case "anxiety":
-        switch (respuesta) {
-          case "Nunca":
-            return 0;
-          case "Ninguna":
-            return 1;
-          case "A veces":
-            return 1;
-          case "Pocas":
-            return 1;
-          case "Frecuentemente":
-            return 2;
-          case "Algunas":
-            return 2;
-          case "Casi siempre":
-            return 3;
-          case "Sí, muchas":
-            return 3;
-        }
-        break;
-      case "loneliness":
-        switch (respuesta) {
-          case "Casi nunca":
-            return 0;
-          case "Frecuentemente":
-            return 0;
-          case "Siempre":
-            return 0;
-          case "Algunas veces":
-            return 1;
-          case "A veces":
-            return 1;
-          case "Rara vez":
-            return 2;
-          case "A menudo":
-            return 3;
-          case "Nunca":
-            return 3;
-        }
-        break;
+  int _getScore(String respuesta) {
+    if (respuesta == "Did not apply to me at all") {
+      return 0; // No aplica, no suma puntos
+    } else if (respuesta ==
+        "Applied to me to some degree, or some of the time") {
+      return 1; // Aplica un poco, suma 1 punto
+    } else if (respuesta ==
+        "Applied to me to a considerable degree or a good part of time") {
+      return 2; // Aplica moderadamente, suma 2 puntos
+    } else if (respuesta == "Applied to me very much or most of the time") {
+      return 3; // Aplica mucho, suma 3 puntos
     }
-    return 0;
+    return 0; // Valor por defecto si no coincide ninguna opción
   }
 
   // Guarda los puntajes finales en Firebase
   Future<void> _saveFinalScores() async {
-    // Usa Provider.of para acceder a MyAppState
     // Referencia a la sesión actual
     final sessionRef = context.read<MyAppState>().sessionRef;
+    //Obtener ID de sesión para Hive
+    final sid = context.read<MyAppState>().sessionRef?.id;
     if (sessionRef != null) {
+      // Actualizar Firestore
       await sessionRef.update({
         "scores": {
           "scoreDepression": _scoreDepression,
           "scoreAnxiety": _scoreAnxiety,
-          "scoreLoneliness": _scoreLoneliness,
+          "scoreStress": _scoreStress,
         },
         'timestamp': FieldValue.serverTimestamp(), // Actualiza el timestamp
       });
+      // Actualizar Hive local
+      var box = Hive.box<SessionData>('sessionsBox');
+      final local = box.get(sid); // Obtiene la sesión local
+      if (local != null) {
+        local.scores = Scores(
+          scoreDepression: _scoreDepression,
+          scoreAnxiety: _scoreAnxiety,
+          scoreStress: _scoreStress,
+        );
+        local.timestamp = DateTime.now();
+        await local.save(); // HiveObject: guarda cambios
+      } else {
+        // Si no existe, creamos sessionData y guardamos:
+        final sessionData = SessionData(
+          timestamp: DateTime.now(),
+          scores: Scores(
+            scoreDepression: _scoreDepression,
+            scoreAnxiety: _scoreAnxiety,
+            scoreStress: _scoreStress,
+          ),
+        );
+        await box.put(sid, sessionData);
+      }
     } else {
       print("No hay sessionRef para guardar scores");
     }
@@ -171,7 +155,7 @@ class _QuestionPageState extends State<QuestionPage> {
         print("✅ Resultados finales guardados en Firebase");
         print("📈Puntaje depresión: $_scoreDepression");
         print("📈Puntaje ansiedad: $_scoreAnxiety");
-        print("📈Puntaje soledad: $_scoreLoneliness");
+        print("📈Puntaje estrés: $_scoreStress");
       }).catchError((e) {
         print("❌ Error guardando resumen: $e");
       });
@@ -256,7 +240,7 @@ class _QuestionPageState extends State<QuestionPage> {
                                     builder: (context) => RecommendationPage(
                                       depressionScore: _scoreDepression,
                                       anxietyScore: _scoreAnxiety,
-                                      lonelinessScore: _scoreLoneliness,
+                                      stressScore: _scoreStress,
                                     ),
                                   ),
                                 );
@@ -277,7 +261,7 @@ class _QuestionPageState extends State<QuestionPage> {
                                     builder: (context) => LLMRecommendationPage(
                                       depressionScore: _scoreDepression,
                                       anxietyScore: _scoreAnxiety,
-                                      lonelinessScore: _scoreLoneliness,
+                                      stressScore: _scoreStress,
                                     ),
                                   ),
                                 );
@@ -300,7 +284,7 @@ class _QuestionPageState extends State<QuestionPage> {
                               //_currentQuestionIndex = 0;
                               _scoreDepression = 0;
                               _scoreAnxiety = 0;
-                              _scoreLoneliness = 0;
+                              _scoreStress = 0;
                             });
                           },
                           style: ElevatedButton.styleFrom(

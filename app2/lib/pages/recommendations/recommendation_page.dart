@@ -3,19 +3,19 @@ import 'package:flutter/material.dart';
 class RecommendationPage extends StatelessWidget {
   final int depressionScore;
   final int anxietyScore;
-  final int lonelinessScore;
+  final int stressScore;
 
   RecommendationPage({
     required this.depressionScore,
     required this.anxietyScore,
-    required this.lonelinessScore,
+    required this.stressScore,
   });
 
   // Respuesta según la puntuación del parámetro de depresión
   String getDepressionRecommendation() {
-    if (depressionScore <= 5) {
+    if (depressionScore <= 7) {
       return "Tu nivel de síntomas depresivos es bajo. Continúa con actividades que te generen bienestar emocional y mantén un estilo de vida saludable.";
-    } else if (depressionScore <= 10) {
+    } else if (depressionScore <= 14) {
       return "Tu nivel de síntomas depresivos es moderado. Podría ser útil hablar con alguien de confianza o un profesional si sientes que estos síntomas afectan tu vida diaria.";
     } else {
       return "Tu nivel de síntomas depresivos es alto. Se recomienda buscar apoyo profesional y rodearte de personas que puedan brindarte apoyo emocional.";
@@ -24,23 +24,23 @@ class RecommendationPage extends StatelessWidget {
 
   // Respuesta según la puntuación del parámetro de ansiedad
   String getAnxietyRecommendation() {
-    if (anxietyScore <= 5) {
+    if (anxietyScore <= 7) {
       return "Tu nivel de ansiedad es bajo. Sigue manteniendo una buena gestión del estrés y busca momentos para relajarte.";
-    } else if (anxietyScore <= 10) {
+    } else if (anxietyScore <= 14) {
       return "Tu nivel de ansiedad es moderado. Intenta practicar técnicas de relajación como la respiración profunda o la meditación.";
     } else {
       return "Tu nivel de ansiedad es alto. Sería recomendable buscar ayuda profesional para aprender estrategias de manejo del estrés y la ansiedad.";
     }
   }
 
-  // Respuesta según la puntuación del parámetro de soledad
-  String getLonelinessRecommendation() {
-    if (lonelinessScore <= 3) {
-      return "Tu nivel de aislamiento social es bajo. Sigue manteniendo una vida social activa y apóyate en tus seres queridos.";
-    } else if (lonelinessScore <= 6) {
-      return "Tu nivel de aislamiento es moderado. Intenta mantener más contacto con amigos y familiares. Participar en actividades grupales puede ayudarte.";
+  // Respuesta según la puntuación del parámetro de estrés
+  String getStressRecommendation() {
+    if (stressScore <= 7) {
+      return "Tu nivel de estrés es bajo. Prueba con técnicas de relajación y respiración profunda que ayuden a mantener la calma.";
+    } else if (stressScore <= 14) {
+      return "Tu nivel de estrés es moderado. Integra pausas activas y breves sesiones de mindfulness en tu rutina diaria para aliviar la tensión.";
     } else {
-      return "Tu nivel de aislamiento es alto. Podría ser útil hablar con alguien de confianza o un profesional. Considera unirte a comunidades o buscar apoyo.";
+      return "Tu nivel de estrés es alto. Busca apoyo profesional y establece un hábito diario de autocuidado con meditación y descanso adecuado.";
     }
   }
 
@@ -139,7 +139,7 @@ class RecommendationPage extends StatelessWidget {
                 ),
                 SizedBox(height: 20),
                 Text(
-                  "Soledad y Aislamiento Social:",
+                  "Estrés:",
                   style: TextStyle(
                       fontSize: 20,
                       fontWeight: FontWeight.bold,
@@ -147,14 +147,14 @@ class RecommendationPage extends StatelessWidget {
                   textAlign: TextAlign.center,
                 ),
                 Text(
-                  "Tu soledad tiene una puntuación de: $lonelinessScore",
+                  "Tu estrés tiene una puntuación de: $stressScore",
                   style: TextStyle(
                       fontSize: 15,
                       color: Theme.of(context).colorScheme.primaryContainer),
                   textAlign: TextAlign.center,
                 ),
                 Text(
-                  getLonelinessRecommendation(),
+                  getStressRecommendation(),
                   style: TextStyle(
                       fontSize: 18,
                       color: Theme.of(context).colorScheme.onPrimary),

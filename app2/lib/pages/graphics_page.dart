@@ -12,84 +12,102 @@ class GraphicPage extends StatefulWidget {
 class _GraphicPageState extends State<GraphicPage> {
   List<FlSpot> depressionData = [];
   List<FlSpot> anxietyData = [];
-  List<FlSpot> lonelinessData = [];
+  List<FlSpot> stressData = [];
+  List<FlSpot> moodData = [];
+  List<FlSpot> flagCountData = []; // ← NUEVO: datos de número de flags
 
   @override
   void initState() {
     super.initState();
-    _fetchWeeklyData();
+    _fetchSessionData(); // renombrado para claridad
   }
 
-  Future<void> _fetchWeeklyData() async {
+  Future<void> _fetchSessionData() async {
     try {
-      QuerySnapshot snapshot = await FirebaseFirestore.instance
-          .collection("respuestas")
+      // 1) Traer las últimas 5 sesiones, de la más reciente a la más antigua
+      final snapshot = await FirebaseFirestore.instance
+          .collection("sessions")
           .orderBy("timestamp", descending: true)
+          .limit(5)
           .get();
 
-      Map<String, List<int>> weeklyScores = {
-        "depression": List.filled(5, 0),
-        "anxiety": List.filled(5, 0),
-        "loneliness": List.filled(5, 0)
+      // 2) Listas temporales para cada parámetro
+      final sessionScores = {
+        "depression": <double>[],
+        "anxiety": <double>[],
+        "stress": <double>[],
       };
+      final sessionMoods = <double>[];
+      final sessionFlagCounts = <double>[]; // ← NUEVO
 
-      Map<String, List<int>> weeklyCounts = {
-        "depression": List.filled(5, 0),
-        "anxiety": List.filled(5, 0),
-        "loneliness": List.filled(5, 0)
-      };
+      // 3) Extraer datos de cada sesión en orden cronológico (invertimos)
+      for (var doc in snapshot.docs.reversed) {
+        final raw = doc.data();
+        final data = Map<String, dynamic>.from(raw as Map);
+        final scores = Map<String, dynamic>.from(
+            data["scores"] != null ? data["scores"] as Map : {});
+        final mood = Map<String, dynamic>.from(
+            data["mood"] != null ? data["mood"] as Map : {});
 
-      DateTime now = DateTime.now();
-      for (var doc in snapshot.docs) {
-        DateTime timestamp = (doc["timestamp"] as Timestamp).toDate();
-        int weekDiff = now.difference(timestamp).inDays ~/ 7;
+        // ← sustituyo aquí la línea antigua
+        final rawFlags = data["flags"];
+        final List<dynamic> flags = rawFlags is List
+            ? rawFlags
+            : rawFlags is Map
+                ? [rawFlags]
+                : [];
 
-        if (weekDiff < 5) {
-          String pregunta = doc["pregunta"];
-          var data = doc.data() as Map<String, dynamic>;
-          int score = data.containsKey("puntaje") ? data["puntaje"] : 0;
+        // Scores
+        sessionScores["depression"]!
+            .add((scores["scoreDepression"] ?? 0).toDouble());
+        sessionScores["anxiety"]!.add((scores["scoreAnxiety"] ?? 0).toDouble());
+        sessionScores["stress"]!.add((scores["scoreStress"] ?? 0).toDouble());
 
-          if (pregunta.contains("tristeza") ||
-              pregunta.contains("desesperanza") ||
-              pregunta.contains("placer") ||
-              pregunta.contains("culpable")) {
-            weeklyScores["depression"]![weekDiff] += score;
-            weeklyCounts["depression"]![weekDiff] += 1;
-          } else if (pregunta.contains("ansiedad") ||
-              pregunta.contains("preocupaciones") ||
-              pregunta.contains("ritmo cardíaco")) {
-            weeklyScores["anxiety"]![weekDiff] += score;
-            weeklyCounts["anxiety"]![weekDiff] += 1;
-          } else {
-            weeklyScores["loneliness"]![weekDiff] += score;
-            weeklyCounts["loneliness"]![weekDiff] += 1;
-          }
-        }
+        // Mood:value
+        sessionMoods.add((mood["value"] ?? 0).toDouble());
+
+        // Número de flags
+        sessionFlagCounts.add(flags.length.toDouble());
       }
 
+      // 4) Generar FlSpots y actualizar el estado
       setState(() {
-        depressionData = _calculateWeeklyAverage(
-            weeklyScores["depression"]!, weeklyCounts["depression"]!);
-        anxietyData = _calculateWeeklyAverage(
-            weeklyScores["anxiety"]!, weeklyCounts["anxiety"]!);
-        lonelinessData = _calculateWeeklyAverage(
-            weeklyScores["loneliness"]!, weeklyCounts["loneliness"]!);
+        depressionData = List.generate(
+          sessionScores["depression"]!.length,
+          (i) => FlSpot(i.toDouble(), sessionScores["depression"]![i]),
+        );
+        anxietyData = List.generate(
+          sessionScores["anxiety"]!.length,
+          (i) => FlSpot(i.toDouble(), sessionScores["anxiety"]![i]),
+        );
+        stressData = List.generate(
+          sessionScores["stress"]!.length,
+          (i) => FlSpot(i.toDouble(), sessionScores["stress"]![i]),
+        );
+        moodData = List.generate(
+          sessionMoods.length,
+          (i) => FlSpot(i.toDouble(), sessionMoods[i]),
+        );
+        flagCountData = List.generate(
+          sessionFlagCounts.length,
+          (i) => FlSpot(i.toDouble(), sessionFlagCounts[i]),
+        );
       });
     } catch (e) {
-      print("❌ Error al obtener datos: $e");
+      print("❌ Error al obtener sesiones: $e");
     }
   }
 
-  List<FlSpot> _calculateWeeklyAverage(List<int> scores, List<int> counts) {
-    List<FlSpot> data = [];
-    for (int i = 0; i < scores.length; i++) {
-      double average = counts[i] > 0 ? scores[i] / counts[i] : 0;
-      data.add(FlSpot(i.toDouble(), average));
-    }
-    return data;
-  }
-
+  /// Construye una gráfica de línea con título [title], puntos [data] y color [color].
   Widget _buildChart(String title, List<FlSpot> data, Color color) {
+    final maxX = data.isNotEmpty ? data.length - 1.0 : 0.0;
+    final maxY = data.isNotEmpty
+        ? data.map((s) => s.y).reduce((a, b) => a > b ? a : b)
+        : 0.0;
+
+    // <-- evito intervalo 0
+    final yInterval = maxY > 0 ? maxY / 4 : 1.0;
+
     return Card(
       color: Colors.white.withOpacity(0.2),
       elevation: 4,
@@ -108,21 +126,35 @@ class _GraphicPageState extends State<GraphicPage> {
               height: 200,
               child: LineChart(
                 LineChartData(
+                  minX: 0,
+                  maxX: maxX,
+                  minY: 0,
+                  maxY: maxY,
                   gridData: FlGridData(show: false),
+                  borderData: FlBorderData(show: false),
                   titlesData: FlTitlesData(
-                    leftTitles:
-                        AxisTitles(sideTitles: SideTitles(showTitles: false)),
+                    leftTitles: AxisTitles(
+                      sideTitles: SideTitles(
+                        showTitles: true,
+                        interval: yInterval, // nunca 0
+                      ),
+                    ),
                     bottomTitles: AxisTitles(
                       sideTitles: SideTitles(
                         showTitles: true,
+                        interval: 1,
                         getTitlesWidget: (value, meta) {
-                          return Text("Semana ${(value + 1).toInt()}",
-                              style: TextStyle(fontSize: 12));
+                          final i = value.toInt();
+                          if (i < 0 || i > maxX) return const SizedBox();
+                          return Padding(
+                            padding: const EdgeInsets.only(top: 6.0),
+                            child: Text('S${i + 1}',
+                                style: TextStyle(fontSize: 12)),
+                          );
                         },
                       ),
                     ),
                   ),
-                  borderData: FlBorderData(show: false),
                   lineBarsData: [
                     LineChartBarData(
                       spots: data,
@@ -137,7 +169,7 @@ class _GraphicPageState extends State<GraphicPage> {
                   ],
                 ),
               ),
-            )
+            ),
           ],
         ),
       ),
@@ -164,7 +196,7 @@ class _GraphicPageState extends State<GraphicPage> {
             titleTextStyle: TextStyle(
               fontSize: 25,
               fontWeight: FontWeight.bold,
-              color: Theme.of(context).colorScheme.primaryContainer,
+              color: colorScheme.primaryContainer,
             ),
           ),
         ),
@@ -181,10 +213,14 @@ class _GraphicPageState extends State<GraphicPage> {
             child: Column(
               children: [
                 _buildChart(
-                    "Depresión (BDI-II)", depressionData, Colors.redAccent),
-                _buildChart("Ansiedad (BSI)", anxietyData, Colors.orangeAccent),
-                _buildChart("Soledad (UCLA Loneliness Scale)", lonelinessData,
-                    Colors.blueAccent),
+                    "Depresión (DASS21)", depressionData, Colors.redAccent),
+                _buildChart(
+                    "Ansiedad (DASS21)", anxietyData, Colors.orangeAccent),
+                _buildChart("Estrés (DASS21)", stressData, Colors.blueAccent),
+                _buildChart(
+                    "Mood Level", moodData, Colors.purpleAccent), // ← NUEVO
+                _buildChart("Flags Detected", flagCountData,
+                    Colors.greenAccent), // ← NUEVO
               ],
             ),
           ),
@@ -196,50 +232,42 @@ class _GraphicPageState extends State<GraphicPage> {
         child: Row(
           mainAxisAlignment: MainAxisAlignment.start,
           children: [
-            Column(
-              children: [
-                FloatingActionButton(
-                  onPressed: () {
-                    // Redirige a la página RecommendationPage usando Navigator
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => RecommendationPage(
-                          depressionScore: 0,
-                          anxietyScore: 0,
-                          lonelinessScore: 0,
-                        ),
-                      ),
-                    );
-                  },
-                  backgroundColor: colorScheme.primary,
-                  foregroundColor: colorScheme.onPrimary,
-                  shape: const CircleBorder(),
-                  tooltip: 'Check out the recommendations!',
-                  child: const Icon(Icons.dataset_outlined),
-                ),
-                SizedBox(height: 10), // Espaciado entre botones
-                FloatingActionButton(
-                  onPressed: () {
-                    // Redirige a la página LLMRecommendationPage usando Navigator
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => LLMRecommendationPage(
-                          depressionScore: 0,
-                          anxietyScore: 0,
-                          lonelinessScore: 0,
-                        ),
-                      ),
-                    );
-                  },
-                  backgroundColor: colorScheme.primary,
-                  foregroundColor: colorScheme.onPrimary,
-                  shape: const CircleBorder(),
-                  tooltip: 'Check out the IA recommendations!',
-                  child: const Icon(Icons.memory_outlined),
-                ),
-              ],
+            FloatingActionButton(
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => RecommendationPage(
+                      depressionScore: 0,
+                      anxietyScore: 0,
+                      stressScore: 0,
+                    ),
+                  ),
+                );
+              },
+              backgroundColor: colorScheme.primary,
+              foregroundColor: colorScheme.onPrimary,
+              tooltip: 'Check out the recommendations!',
+              child: const Icon(Icons.dataset_outlined),
+            ),
+            SizedBox(width: 10),
+            FloatingActionButton(
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => LLMRecommendationPage(
+                      depressionScore: 0,
+                      anxietyScore: 0,
+                      stressScore: 0,
+                    ),
+                  ),
+                );
+              },
+              backgroundColor: colorScheme.primary,
+              foregroundColor: colorScheme.onPrimary,
+              tooltip: 'Check out the IA recommendations!',
+              child: const Icon(Icons.memory_outlined),
             ),
           ],
         ),

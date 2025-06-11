@@ -4,12 +4,12 @@ import 'package:app2/services/recommend_service.dart';
 class LLMRecommendationPage extends StatefulWidget {
   final int depressionScore;
   final int anxietyScore;
-  final int lonelinessScore;
+  final int stressScore;
 
   LLMRecommendationPage({
     required this.depressionScore,
     required this.anxietyScore,
-    required this.lonelinessScore,
+    required this.stressScore,
   });
   @override
   State<LLMRecommendationPage> createState() => _RecommendationPageState();
@@ -39,7 +39,7 @@ class _RecommendationPageState extends State<LLMRecommendationPage> {
       final response = await _recommendService.sendMessage(
         depressionScore: widget.depressionScore,
         anxietyScore: widget.anxietyScore,
-        lonelinessScore: widget.lonelinessScore,
+        stressScore: widget.stressScore,
         message:
             'Please, generates practical recommendations based on my findings.',
       ); // Envía el prompt al LLM

@@ -4,6 +4,8 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:cloud_firestore/cloud_firestore.dart'; // Para usar Firestore
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:hive_flutter/hive_flutter.dart'; // Para usar Hive
+import 'package:app2/models/session_data.dart'; // Importa modelos de Hive: sessionsBox
 import 'package:provider/provider.dart';
 //import 'firebase_options.dart'; // Archivo generado por flutterfire configure
 
@@ -23,6 +25,18 @@ void main() async {
   } else {
     await Firebase.initializeApp();
   }
+// Inicializar Hive
+  await Hive
+      .initFlutter(); //inicializa el directorio para almacenar datos Hive.
+  // Registro de adaptadores
+  Hive.registerAdapter(SessionDataAdapter()); //adaptador de sessionId
+  Hive.registerAdapter(ScoresAdapter()); //adaptador de puntuaciones
+  Hive.registerAdapter(MoodDataAdapter()); //adaptador de barra estado de ánimo
+  Hive.registerAdapter(FlagDataAdapter()); //adaptador de flag IA
+  // Abrir box que almacena objetos SessionData
+  await Hive.openBox<SessionData>('sessionsBox');
+  /* Otra caja para histórico
+    await Hive.openBox<SessionData>('sessionsHistory'); */
 
   runApp(MyApp());
 }
@@ -72,21 +86,32 @@ class MyAppState extends ChangeNotifier {
   // Getter para acceder a la referencia de sesión
   DocumentReference? get sessionRef => _sessionRef;
 
+  // Método para inicializar la sesión + identificador de sesión
   Future<void> _initSession() async {
-    try {
-      // Generar un ID de sesión basado en timestamp al arrancar la app
-      final sid = DateTime.now().millisecondsSinceEpoch.toString();
-      final docRef = FirebaseFirestore.instance.collection('sessions').doc(sid);
-      _sessionRef = docRef;
-      // Crear el documento con campo timestamp inicial
-      await docRef.set({
-        'timestamp': FieldValue.serverTimestamp(),
-      });
-      print('Sesión iniciada con ID: $sid');
-      notifyListeners();
-    } catch (e) {
-      print('Error creando sesión inicial en Firestore: $e');
-    }
+    final sid = DateTime.now().millisecondsSinceEpoch.toString();
+    _sessionRef = FirebaseFirestore.instance.collection('sessions').doc(sid);
+
+    // Crea en Firestore con la estructura inicial
+    await _sessionRef!.set({
+      'timestamp': FieldValue.serverTimestamp(),
+      'scores': {'scoreDepression': 0, 'scoreAnxiety': 0, 'scoreStress': 0},
+      'mood': {'value': 0.0, 'label': ''},
+      'recommendations': '',
+      'flags': [],
+    });
+
+    // Crea/actualiza local en Hive
+    var box = Hive.box<SessionData>('sessionsBox');
+    final sd = SessionData(
+      timestamp: DateTime.now(),
+      scores: Scores(scoreDepression: 0, scoreAnxiety: 0, scoreStress: 0),
+      mood: MoodData(moodLabel: '', value: 0.0),
+      recommendations: '',
+      flag: null,
+    );
+    await box.put(sid, sd);
+
+    notifyListeners();
   }
 
   // Método para limpiar

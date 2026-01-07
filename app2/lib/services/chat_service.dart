@@ -33,7 +33,7 @@ class ChatService {
 
     final body = json.encode({
       'model':
-          'meta-llama/llama-3.3-8b-instruct:free', // Modelo de IA a utilizar
+          'meta-llama/llama-3.3-70b-instruct:free', // Modelo de IA a utilizar
 
       'messages': [
         {

@@ -5,11 +5,13 @@ class LLMRecommendationPage extends StatefulWidget {
   final int depressionScore;
   final int anxietyScore;
   final int stressScore;
+  final String contextSummary; //a parir de graphics_page.dart
 
   LLMRecommendationPage({
     required this.depressionScore,
     required this.anxietyScore,
     required this.stressScore,
+    this.contextSummary = '', //no es required
   });
   @override
   State<LLMRecommendationPage> createState() => _RecommendationPageState();
@@ -36,12 +38,19 @@ class _RecommendationPageState extends State<LLMRecommendationPage> {
     });
 
     try {
+      final ctx =
+          widget.contextSummary.trim(); //Comprobar contexto previo si existe
       final response = await _recommendService.sendMessage(
         depressionScore: widget.depressionScore,
         anxietyScore: widget.anxietyScore,
         stressScore: widget.stressScore,
-        message:
-            'Please, generates practical recommendations based on my findings.',
+        message: [
+          if (ctx.isNotEmpty) 'Context from my last sessions:\n$ctx\n',
+          'Task: Generate practical recommendations based on my scores '
+              '(depression=${widget.depressionScore}, anxiety=${widget.anxietyScore}, stress=${widget.stressScore}). '
+              'Prioritize what matches the mood and flags if context is provided. '
+              'Avoid clinical diagnosis.',
+        ].join('\n'),
       ); // Envía el prompt al LLM
       setState(() {
         _recommendation =

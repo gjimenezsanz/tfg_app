@@ -33,6 +33,8 @@ void main() async {
   Hive.registerAdapter(ScoresAdapter()); //adaptador de puntuaciones
   Hive.registerAdapter(MoodDataAdapter()); //adaptador de barra estado de ánimo
   Hive.registerAdapter(FlagDataAdapter()); //adaptador de flag IA
+  Hive.registerAdapter(
+      RecommendationDataAdapter()); //adaptador de recomendación IA
   // Abrir box que almacena objetos SessionData
   await Hive.openBox<SessionData>('sessionsBox');
   /* Otra caja para histórico

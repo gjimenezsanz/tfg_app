@@ -20,8 +20,8 @@ class SessionDataAdapter extends TypeAdapter<SessionData> {
       timestamp: fields[0] as DateTime?,
       scores: fields[1] as Scores?,
       mood: fields[2] as MoodData?,
-      recommendations: fields[3] as String?,
-      flag: fields[4] as FlagData?,
+      flag: fields[3] as FlagData?,
+      recommendations: fields[4] as String?,
     );
   }
 
@@ -36,9 +36,9 @@ class SessionDataAdapter extends TypeAdapter<SessionData> {
       ..writeByte(2)
       ..write(obj.mood)
       ..writeByte(3)
-      ..write(obj.recommendations)
+      ..write(obj.flag)
       ..writeByte(4)
-      ..write(obj.flag);
+      ..write(obj.recommendations);
   }
 
   @override
@@ -165,6 +165,40 @@ class FlagDataAdapter extends TypeAdapter<FlagData> {
   bool operator ==(Object other) =>
       identical(this, other) ||
       other is FlagDataAdapter &&
+          runtimeType == other.runtimeType &&
+          typeId == other.typeId;
+}
+
+class RecommendationDataAdapter extends TypeAdapter<RecommendationData> {
+  @override
+  final int typeId = 4;
+
+  @override
+  RecommendationData read(BinaryReader reader) {
+    final numOfFields = reader.readByte();
+    final fields = <int, dynamic>{
+      for (int i = 0; i < numOfFields; i++) reader.readByte(): reader.read(),
+    };
+    return RecommendationData(
+      recommendationText: fields[0] as String,
+    );
+  }
+
+  @override
+  void write(BinaryWriter writer, RecommendationData obj) {
+    writer
+      ..writeByte(1)
+      ..writeByte(0)
+      ..write(obj.recommendationText);
+  }
+
+  @override
+  int get hashCode => typeId.hashCode;
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is RecommendationDataAdapter &&
           runtimeType == other.runtimeType &&
           typeId == other.typeId;
 }

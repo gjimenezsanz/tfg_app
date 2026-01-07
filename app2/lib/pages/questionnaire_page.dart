@@ -133,6 +133,9 @@ class _QuestionPageState extends State<QuestionPage> {
         );
         await box.put(sid, sessionData);
       }
+      final saved = box.get(sid);
+      print(
+          'HIVE[$sid] scores= Depression:${saved?.scores?.scoreDepression} Anxiety:${saved?.scores?.scoreAnxiety} Stress:${saved?.scores?.scoreStress}');
     } else {
       print("No hay sessionRef para guardar scores");
     }
@@ -170,7 +173,7 @@ class _QuestionPageState extends State<QuestionPage> {
     if (_questions.isEmpty) {
       return Scaffold(
         appBar: AppBar(
-          title: Text("Cuestionario"),
+          title: Text("Questionnaire"),
           backgroundColor: Colors.black,
           iconTheme: IconThemeData(
               color: Theme.of(context).colorScheme.primaryContainer),
@@ -221,7 +224,7 @@ class _QuestionPageState extends State<QuestionPage> {
                       crossAxisAlignment: CrossAxisAlignment.center,
                       children: [
                         Text(
-                          "Cuestionario terminado con exito!!",
+                          "The questionnaire has been successfully completed!",
                           style: TextStyle(
                               fontSize: 40,
                               fontWeight: FontWeight.bold,
@@ -246,7 +249,7 @@ class _QuestionPageState extends State<QuestionPage> {
                                 );
                               },
                               child: Text(
-                                "Ver recomendaciones con respuesta mecánica",
+                                "View recommendations with static responses",
                                 style: TextStyle(
                                   fontSize: 15,
                                 ),
@@ -267,7 +270,7 @@ class _QuestionPageState extends State<QuestionPage> {
                                 );
                               },
                               child: Text(
-                                "Ver recomendaciones con respuesta IA",
+                                "View recommendations with dynamic responses",
                                 style: TextStyle(
                                   fontSize: 15,
                                 ),
@@ -291,7 +294,7 @@ class _QuestionPageState extends State<QuestionPage> {
                             backgroundColor:
                                 Colors.deepPurple.shade200.withOpacity(0.8),
                           ),
-                          child: Text("Volver a la página principal",
+                          child: Text("Back to Home Page",
                               style: TextStyle(
                                   fontSize: 15,
                                   color:
@@ -354,8 +357,8 @@ class _QuestionPageState extends State<QuestionPage> {
                             _selectedOption != null ? _nextQuestion : null,
                         child: Text(
                           _currentIndex < _questions.length - 1
-                              ? "Siguiente"
-                              : "Finalizar",
+                              ? "Next"
+                              : "Finish",
                           style: TextStyle(
                             fontSize: 15,
                           ),

@@ -182,6 +182,9 @@ class _MoodTrackerState extends State<MoodTracker> {
                         );
                         await box.put(sid, sessionData);
                       }
+                      final saved = box.get(sid);
+                      print(
+                          'HIVE[$sid] mood="${saved?.mood?.moodLabel}" value=${saved?.mood?.value}');
                       // Muestra un mensaje emergente de confirmación
                       ScaffoldMessenger.of(context).showSnackBar(
                         SnackBar(

@@ -1,6 +1,6 @@
 import 'package:hive/hive.dart';
 
-part 'session_data.g.dart'; // Genera el código adaptador Hive
+part 'session_data.g.dart';
 
 @HiveType(typeId: 0)
 class SessionData extends HiveObject {
@@ -14,28 +14,29 @@ class SessionData extends HiveObject {
   MoodData? mood; // Estado de ánimo
 
   @HiveField(3)
-  String? recommendations; // Texto recomendación IA
-
-  @HiveField(4)
   FlagData? flag; // Guardamos un solo flag
 
-  // Constructor
+  @HiveField(4)
+  String? recommendations; // Texto recomendación IA
+
   SessionData({
     this.timestamp,
     this.scores,
     this.mood,
-    this.recommendations,
     this.flag,
+    this.recommendations,
   });
 }
 
-// Parametros tipo 1: Puntuación cuestionario
+// Parámetros tipo 1: Puntuación cuestionario
 @HiveType(typeId: 1)
 class Scores extends HiveObject {
   @HiveField(0)
   int scoreDepression;
+
   @HiveField(1)
   int scoreAnxiety;
+
   @HiveField(2)
   int scoreStress;
 
@@ -46,11 +47,12 @@ class Scores extends HiveObject {
   });
 }
 
-//Parametros tipo 2: Barra de estado de ánimo
+// Parámetros tipo 2: Barra de estado de ánimo
 @HiveType(typeId: 2)
 class MoodData extends HiveObject {
   @HiveField(0)
   String moodLabel;
+
   @HiveField(1)
   double value;
 
@@ -60,13 +62,15 @@ class MoodData extends HiveObject {
   });
 }
 
-// Parametros tipo 3: Flags detectado por IA
+// Parámetros tipo 3: Flags detectado por IA
 @HiveType(typeId: 3)
 class FlagData extends HiveObject {
   @HiveField(0)
   String prompt;
+
   @HiveField(1)
   String snippet;
+
   @HiveField(2)
   String type; // "anxiety", "depression", "stress" o "none"
 
@@ -74,5 +78,16 @@ class FlagData extends HiveObject {
     required this.prompt,
     required this.snippet,
     required this.type,
+  });
+}
+
+// Parámetros tipo 4: Recomendación chat IA
+@HiveType(typeId: 4)
+class RecommendationData extends HiveObject {
+  @HiveField(0)
+  String recommendationText;
+
+  RecommendationData({
+    required this.recommendationText,
   });
 }

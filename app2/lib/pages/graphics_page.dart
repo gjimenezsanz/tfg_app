@@ -16,12 +16,57 @@ class _GraphicPageState extends State<GraphicPage> {
   List<FlSpot> moodData = [];
   List<FlSpot> flagCountData = []; // ← NUEVO: datos de número de flags
 
+  // Resúmenes y tendencias de las tablas
+  int depSummary = 0;
+  int anxSummary = 0;
+  int strSummary = 0;
+
+  String depTrend = 'stable'; // 'increasing', 'decreasing', 'stable'
+  String anxTrend = 'stable';
+  String strTrend = 'stable';
+
+  double moodSummary = 0; // Valor medio de mood
+  Map<String, int> flagCounts =
+      {}; // Valores de conteo de flags. ej: {'stress': 2, 'anxiety': 1}
+
   @override
   void initState() {
     super.initState();
-    _fetchSessionData(); // renombrado para claridad
+    _fetchSessionData();
   }
 
+  //---------------CÁLCULOS DE RESÚMENES Y TENDENCIAS----------------//
+  double _media(List<double> xs) =>
+      xs.isEmpty ? 0 : xs.reduce((a, b) => a + b) / xs.length; // media
+
+  // tendencia simple: pendiente de una regresión lineal con x=0..n-1
+  // devuelve pendiente
+  double _slope(List<double> ys) {
+    final n = ys.length;
+    if (n < 2) return 0;
+
+    double sumX = 0, sumY = 0, sumXY = 0, sumXX = 0;
+    for (int i = 0; i < n; i++) {
+      final x = i.toDouble();
+      final y = ys[i];
+      sumX += x;
+      sumY += y;
+      sumXY += x * y;
+      sumXX += x * x;
+    }
+    final denom = (n * sumXX - sumX * sumX);
+    if (denom == 0) return 0;
+    return (n * sumXY - sumX * sumY) / denom;
+  }
+
+  // convierte pendiente en etiqueta de tendencia
+  String _trendLabel(double slope) {
+    if (slope > 0.15) return 'up';
+    if (slope < -0.15) return 'down';
+    return 'stable';
+  }
+
+  //---------------FETCH DATA FROM FIRESTORE----------------//
   Future<void> _fetchSessionData() async {
     try {
       // 1) Traer las últimas 5 sesiones, de la más reciente a la más antigua
@@ -49,7 +94,7 @@ class _GraphicPageState extends State<GraphicPage> {
         final mood = Map<String, dynamic>.from(
             data["mood"] != null ? data["mood"] as Map : {});
 
-        // ← sustituyo aquí la línea antigua
+        // Flags
         final rawFlags = data["flags"];
         final List<dynamic> flags = rawFlags is List
             ? rawFlags
@@ -58,16 +103,24 @@ class _GraphicPageState extends State<GraphicPage> {
                 : [];
 
         // Scores
-        sessionScores["depression"]!
-            .add((scores["scoreDepression"] ?? 0).toDouble());
-        sessionScores["anxiety"]!.add((scores["scoreAnxiety"] ?? 0).toDouble());
-        sessionScores["stress"]!.add((scores["scoreStress"] ?? 0).toDouble());
-
+        final dep = (scores["scoreDepression"] ?? 0).toDouble();
+        final anx = (scores["scoreAnxiety"] ?? 0).toDouble();
+        final str = (scores["scoreStress"] ?? 0).toDouble();
         // Mood:value
-        sessionMoods.add((mood["value"] ?? 0).toDouble());
-
+        final modo = (mood["value"] ?? 0).toDouble();
         // Número de flags
-        sessionFlagCounts.add(flags.length.toDouble());
+        final flag = flags.length.toDouble();
+
+        // Si es “sesión vacía” (la creada al inicio), la saltamos
+        if (dep == 0 && anx == 0 && str == 0 && modo == 0 && flag == 0) {
+          continue;
+        }
+
+        sessionScores["depression"]!.add(dep);
+        sessionScores["anxiety"]!.add(anx);
+        sessionScores["stress"]!.add(str);
+        sessionMoods.add(modo);
+        sessionFlagCounts.add(flag);
       }
 
       // 4) Generar FlSpots y actualizar el estado
@@ -93,12 +146,49 @@ class _GraphicPageState extends State<GraphicPage> {
           (i) => FlSpot(i.toDouble(), sessionFlagCounts[i]),
         );
       });
+      //Cálculo de resúmenes y tendencias
+      final depList = sessionScores["depression"]!;
+      final anxList = sessionScores["anxiety"]!;
+      final strList = sessionScores["stress"]!;
+
+      // calcular medias
+      depSummary = _media(depList).round();
+      anxSummary = _media(anxList).round();
+      strSummary = _media(strList).round();
+      moodSummary = _media(sessionMoods);
+      // calcular tendencias
+      depTrend = _trendLabel(_slope(depList));
+      anxTrend = _trendLabel(_slope(anxList));
+      strTrend = _trendLabel(_slope(strList));
+
+      // contar flags por tipo
+      //recopilar flags de todas las sesiones
+      final flags = snapshot.docs.expand((doc) {
+        final data = Map<String, dynamic>.from(doc.data() as Map);
+        final rawFlags = data["flags"];
+        if (rawFlags is List) {
+          return rawFlags;
+        } else if (rawFlags is Map) {
+          return [rawFlags];
+        } else {
+          return [];
+        }
+      }).toList();
+
+      final counts = <String, int>{};
+      for (final f in flags) {
+        final type =
+            (f is Map && f["type"] != null) ? f["type"].toString() : "unknown";
+        counts[type] = (counts[type] ?? 0) + 1;
+      }
+      flagCounts = counts;
     } catch (e) {
       print("❌ Error al obtener sesiones: $e");
     }
   }
 
-  /// Construye una gráfica de línea con título [title], puntos [data] y color [color].
+  //---------------GRÁFICOS----------------//
+  // Construye una gráfica de línea con título [title], puntos [data] y color [color].
   Widget _buildChart(String title, List<FlSpot> data, Color color) {
     final maxX = data.isNotEmpty ? data.length - 1.0 : 0.0;
     final maxY = data.isNotEmpty
@@ -176,6 +266,15 @@ class _GraphicPageState extends State<GraphicPage> {
     );
   }
 
+  //---------------CONTEXT SUMMARY STRING----------------//
+  String _buildContextSummary() {
+    return 'Averages: dep=$depSummary, anx=$anxSummary, stress=$strSummary. '
+        'Trends: dep=$depTrend, anx=$anxTrend, stress=$strTrend. '
+        'MoodAvg=${moodSummary.toStringAsFixed(2)}. '
+        'FlagCounts=$flagCounts.';
+  }
+
+  //---------------DISEÑO DE LA PÁGINA----------------//
   @override
   Widget build(BuildContext context) {
     var colorScheme = Theme.of(context).colorScheme;
@@ -227,7 +326,7 @@ class _GraphicPageState extends State<GraphicPage> {
         ),
       ),
       floatingActionButton: Padding(
-        // Botón flotante recomendaciones
+        // ------------------Botón flotante recomendaciones
         padding: const EdgeInsets.all(25),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.start,
@@ -238,9 +337,9 @@ class _GraphicPageState extends State<GraphicPage> {
                   context,
                   MaterialPageRoute(
                     builder: (context) => RecommendationPage(
-                      depressionScore: 0,
-                      anxietyScore: 0,
-                      stressScore: 0,
+                      depressionScore: depSummary,
+                      anxietyScore: anxSummary,
+                      stressScore: strSummary,
                     ),
                   ),
                 );
@@ -253,13 +352,16 @@ class _GraphicPageState extends State<GraphicPage> {
             SizedBox(width: 10),
             FloatingActionButton(
               onPressed: () {
+                print(
+                    'The context summary is: ${_buildContextSummary()}'); //Imprime el resumen de contexto al pulsar
                 Navigator.push(
                   context,
                   MaterialPageRoute(
                     builder: (context) => LLMRecommendationPage(
-                      depressionScore: 0,
-                      anxietyScore: 0,
-                      stressScore: 0,
+                      depressionScore: depSummary,
+                      anxietyScore: anxSummary,
+                      stressScore: strSummary,
+                      contextSummary: _buildContextSummary(),
                     ),
                   ),
                 );

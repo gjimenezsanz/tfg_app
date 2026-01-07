@@ -75,7 +75,7 @@ class _ChatPageState extends State<ChatPage> {
               },
               'timestamp': FieldValue.serverTimestamp(),
             });
-            print('Flag guardada en sesión: ${flag0.type}');
+            print('Flag guardada en sesión Firestore: ${flag0.type}');
           } catch (e) {
             // Manejo de errores al guardar el flag
             print('Error guardando flag en sesión: $e');
@@ -104,6 +104,9 @@ class _ChatPageState extends State<ChatPage> {
             );
             await box.put(sid, sessionData);
           }
+          final saved = box.get(sid);
+          print(
+              'HIVE[$sid] recommendations="${saved?.recommendations}" flag=${saved?.flag?.type}');
         } else {
           // Si no hay flags, mostramos un mensaje
           print('No se detectaron flags');

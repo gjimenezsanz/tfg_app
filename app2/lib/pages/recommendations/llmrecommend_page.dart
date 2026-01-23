@@ -46,8 +46,9 @@ class _RecommendationPageState extends State<LLMRecommendationPage> {
         stressScore: widget.stressScore,
         message: [
           if (ctx.isNotEmpty) 'Context from my last sessions:\n$ctx\n',
-          'Task: Generate practical recommendations based on my scores '
-              '(depression=${widget.depressionScore}, anxiety=${widget.anxietyScore}, stress=${widget.stressScore}). '
+          'Task: Generate practical recommendations based on my DASS-21 scores and decide whether each domain seems low/medium/high (or concerning). ',
+          'Scoring note: each domain score ranges from 0 to 21 (higher = more intense).',
+          '(depression=${widget.depressionScore}, anxiety=${widget.anxietyScore}, stress=${widget.stressScore}). '
               'Prioritize what matches the mood and flags if context is provided. '
               'Avoid clinical diagnosis.',
         ].join('\n'),
@@ -152,8 +153,7 @@ class _RecommendationPageState extends State<LLMRecommendationPage> {
                               children: [
                                 ElevatedButton(
                                   onPressed: _fetchRecommendation,
-                                  child:
-                                      const Text('Actualizar Recomendaciones'),
+                                  child: const Text('Update Recommendations'),
                                 ),
                                 SizedBox(width: 20), // espacio entre botones
                                 ElevatedButton(
@@ -163,7 +163,7 @@ class _RecommendationPageState extends State<LLMRecommendationPage> {
                                         .withOpacity(0.8),
                                   ),
                                   child: Text(
-                                    'Volver',
+                                    'Back',
                                     style: TextStyle(
                                       color: Theme.of(context)
                                           .colorScheme

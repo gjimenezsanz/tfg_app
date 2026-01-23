@@ -196,7 +196,7 @@ class _MoodTrackerState extends State<MoodTracker> {
                           duration: Duration(milliseconds: 400),
                           content: Center(
                             child: Text(
-                              'Tu estado "${moodStatus.label}" ha sido guardado',
+                              'Your status ‘${moodStatus.label}’ has been saved',
                               style: TextStyle(
                                 color: Colors.grey.shade200,
                                 fontSize: 15,
@@ -252,6 +252,8 @@ Widget _CarouselCard(BuildContext context) {
         constraints: const BoxConstraints(maxHeight: 200),
         child: ListView(
           scrollDirection: Axis.horizontal,
+          padding: const EdgeInsets.symmetric(
+              horizontal: 8), // Espaciado horizontal para movil
           children: CardInfo.values.map((CardInfo info) {
             //Widget MouseRegion: Detecta el cursor del ratón
             return MouseRegion(

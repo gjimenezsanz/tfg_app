@@ -12,7 +12,7 @@ class CarruselFeelGoodPage extends StatelessWidget {
   const CarruselFeelGoodPage({Key? key}) : super(key: key);
 
   //Construye el prompt a partir de Hive
-  Future<String> _buildRelaxPrompt(BuildContext context) async {
+  Future<String> _buildFeelGoodPrompt(BuildContext context) async {
     final box = Hive.box<SessionData>('sessionsBox');
     final sid = context.read<MyAppState>().sessionRef!.id;
     final local = box.get(sid);
@@ -53,12 +53,12 @@ class CarruselFeelGoodPage extends StatelessWidget {
     // Fallback si no hay datos locales
     return '''
       You are a mental health assistant for students.
-      Activity: Relaxation
+      Activity: Feel-Good Boost
 
       Context: No local session data found.
 
       Please provide:
-      - Three expert-backed relaxation techniques
+      - Three expert-backed feel-good activities
       - Two YouTube video URLs
       - One illustrative image URL
       - Any useful external links
@@ -82,7 +82,7 @@ class CarruselFeelGoodPage extends StatelessWidget {
             ),
           ),
           child: AppBar(
-            title: Text("Relax Recommendations"),
+            title: Text("Feel Good Recommendations"),
             backgroundColor: Colors.transparent,
             titleTextStyle: TextStyle(
               fontSize: 25,
@@ -105,7 +105,7 @@ class CarruselFeelGoodPage extends StatelessWidget {
           ),
         ),
         child: FutureBuilder<String>(
-          future: _buildRelaxPrompt(context),
+          future: _buildFeelGoodPrompt(context),
           builder: (ctx, snapPrompt) {
             if (snapPrompt.connectionState != ConnectionState.done) {
               return Center(child: CircularProgressIndicator());

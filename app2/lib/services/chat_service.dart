@@ -11,7 +11,11 @@ class ChatService {
   //final String referer = '<url>'; // Opcional
   //final String title = '<title>'; // Opcional
 
-  Future<ChatResult> sendMessage(String message) async {
+  Future<ChatResult> sendMessage(
+    String message, {
+    List<Map<String, dynamic>> history =
+        const [], // Historial de mensajes previos
+  }) async {
     String getBackendUrl() {
       if (kIsWeb) {
         return 'https://openrouter.ai/api/v1/chat/completions'; //endpoint de OpenRouter: url para peticiones POST
@@ -80,6 +84,7 @@ class ChatService {
 
           '''
         },
+        ...history, // Historial previo de mensajes
         {
           //Prompt del usuario ---> IA a modificar
           'role': 'user',

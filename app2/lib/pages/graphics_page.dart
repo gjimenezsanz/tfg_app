@@ -312,10 +312,10 @@ class _GraphicPageState extends State<GraphicPage> {
             child: Column(
               children: [
                 _buildChart(
-                    "Depresión (DASS21)", depressionData, Colors.redAccent),
+                    "Depression (DASS21)", depressionData, Colors.redAccent),
                 _buildChart(
-                    "Ansiedad (DASS21)", anxietyData, Colors.orangeAccent),
-                _buildChart("Estrés (DASS21)", stressData, Colors.blueAccent),
+                    "Anxiety (DASS21)", anxietyData, Colors.orangeAccent),
+                _buildChart("Stress (DASS21)", stressData, Colors.blueAccent),
                 _buildChart(
                     "Mood Level", moodData, Colors.purpleAccent), // ← NUEVO
                 _buildChart("Flags Detected", flagCountData,

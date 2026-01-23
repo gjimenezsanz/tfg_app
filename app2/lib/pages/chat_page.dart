@@ -21,8 +21,12 @@ class _ChatPageState extends State<ChatPage> {
   String? _response; //Respuesta texto
   List<Flag>?
       _detectedFlags; // Lista de flags detectados => Para sacar los flagas por pantalla
+  final List<Map<String, dynamic>> _history =
+      []; // Historial de mensajes previos
 
   void _sendMessage() async {
+    final userMessage = _controller.text.trim(); // Mensaje del usuario
+    if (userMessage.isEmpty) return; // No enviar mensajes vacíos
     setState(() {
       _isLoading = true;
       _error = null;
@@ -34,8 +38,15 @@ class _ChatPageState extends State<ChatPage> {
         _response = "Pensando...";
       });
 
+      // Prepara el historial reciente (últimos 6 mensajes)
+      final recentHistory = _history.length <= 6
+          ? List<Map<String, dynamic>>.from(_history)
+          : _history.sublist(_history.length - 6);
+
       // Envía el mensaje del usuario al servicio de chat
-      final response = await _chatService.sendMessage(_controller.text);
+      final response =
+          await _chatService.sendMessage(userMessage, history: recentHistory);
+      //userMessage se refiere a _textController.text.trim() sin mensajes vacíos
       // Respuesta:
       //  response.text: el texto de recomendaciones
       //  response.flags: la lista de flags detectados
@@ -44,6 +55,14 @@ class _ChatPageState extends State<ChatPage> {
         // Actualiza la respuesta en pantalla
         _response = response.text; // Muestra el texto de recomendaciones
         _detectedFlags = response.flags; // Guarda los flags detectados
+        _history.add({
+          'role': 'user',
+          'content': userMessage
+        }); // Añade el mensaje del usuario al historial
+        _history.add({
+          'role': 'assistant',
+          'content': response.text
+        }); // Añade la respuesta de la IA al historial
       });
 
       // Obtener la sesión global desde MyAppState (Provider)
@@ -69,7 +88,7 @@ class _ChatPageState extends State<ChatPage> {
           try {
             await sessionRef.update({
               'flags': {
-                'prompt': _controller.text,
+                'prompt': userMessage,
                 'snippet': flag0.snippet,
                 'type': flag0.type,
               },
@@ -86,7 +105,7 @@ class _ChatPageState extends State<ChatPage> {
           final local = box.get(sid); // Obtiene la sesión local
           // Si ya existe, actualizamos la flag
           final newFlagData = FlagData(
-            prompt: _controller.text,
+            prompt: userMessage,
             snippet: flag0.snippet,
             type: flag0.type,
           );

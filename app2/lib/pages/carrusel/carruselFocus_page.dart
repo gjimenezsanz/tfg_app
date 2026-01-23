@@ -12,7 +12,7 @@ class CarruselFocusPage extends StatelessWidget {
   const CarruselFocusPage({Key? key}) : super(key: key);
 
   //Construye el prompt a partir de Hive
-  Future<String> _buildRelaxPrompt(BuildContext context) async {
+  Future<String> _buildFocusPrompt(BuildContext context) async {
     final box = Hive.box<SessionData>('sessionsBox');
     final sid = context.read<MyAppState>().sessionRef!.id;
     final local = box.get(sid);
@@ -53,12 +53,12 @@ class CarruselFocusPage extends StatelessWidget {
     // Fallback si no hay datos locales
     return '''
       You are a mental health assistant for students.
-      Activity: Relaxation
+      Activity: Focus improvement techniques
 
       Context: No local session data found.
 
       Please provide:
-      - Three expert-backed relaxation techniques
+      - Three expert-backed focus techniques
       - Two YouTube video URLs
       - One illustrative image URL
       - Any useful external links
@@ -82,7 +82,7 @@ class CarruselFocusPage extends StatelessWidget {
             ),
           ),
           child: AppBar(
-            title: Text("Relax Recommendations"),
+            title: Text("Focus Recommendations"),
             backgroundColor: Colors.transparent,
             titleTextStyle: TextStyle(
               fontSize: 25,
@@ -105,7 +105,7 @@ class CarruselFocusPage extends StatelessWidget {
           ),
         ),
         child: FutureBuilder<String>(
-          future: _buildRelaxPrompt(context),
+          future: _buildFocusPrompt(context),
           builder: (ctx, snapPrompt) {
             if (snapPrompt.connectionState != ConnectionState.done) {
               return Center(child: CircularProgressIndicator());

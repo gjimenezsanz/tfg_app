@@ -11,7 +11,7 @@ class QuestionService {
           json.decode(jsonString); // Decodificar el JSON
 
       List<Question> questions =
-          (jsonData["preguntas"] as List) // Acceder a la lista de preguntas
+          (jsonData["questions"] as List) // Acceder a la lista de preguntas
               .map((data) => Question.fromJson(data))
               .toList();
 

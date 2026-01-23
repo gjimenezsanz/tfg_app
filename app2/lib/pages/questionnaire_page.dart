@@ -16,10 +16,10 @@ class QuestionPage extends StatefulWidget {
 }
 
 class _QuestionPageState extends State<QuestionPage> {
-  int _currentIndex = 0; // Índice de la pregunta actual
-  String? _selectedOption; // Opción respuesta seleccionada
+  int _currentIndex = 0; // Índice de la question actual
+  String? _selectedOption; // Opción response seleccionada
 
-  List<Question> _questions = []; // Lista de preguntas
+  List<Question> _questions = []; // Lista de questions
   int _scoreDepression = 0; // Puntuación total de depresión
   int _scoreAnxiety = 0; // Puntuación total de ansiedad
   int _scoreStress = 0; // Puntuación total de estrés
@@ -38,29 +38,29 @@ class _QuestionPageState extends State<QuestionPage> {
       String jsonString = await rootBundle.loadString('assets/questions.json');
       Map<String, dynamic> jsonData = json.decode(jsonString);
 
-      // Convierte la lista de preguntas del JSON a objetos Question
-      List<Question> questions = (jsonData["preguntas"] as List)
+      // Convierte la lista de questions del JSON a objetos Question
+      List<Question> questions = (jsonData["questions"] as List)
           .map((data) => Question.fromJson(data))
           .toList();
 
-      // Actualiza el estado con las preguntas cargadas
+      // Actualiza el estado con las questions cargadas
       setState(() {
         _questions = questions;
       });
 
-      print("📌 Preguntas cargadas: ${_questions.length}");
+      print("📌 questions cargadas: ${_questions.length}");
     } catch (e) {
-      print("❌ Error al cargar preguntas desde JSON: $e");
+      print("❌ Error al cargar questions desde JSON: $e");
     }
   }
 
-  // Guarda la respuesta en Firebase
-  void _saveResponse(Question pregunta, String respuesta) {
+  // Guarda la response en Firebase
+  void _saveResponse(Question question, String response) {
     // Acumula en la categoria correspondiente la puntuación
-    final score = _getScore(respuesta);
+    final score = _getScore(response);
 
     // Acumula en la categoría correspondiente
-    switch (pregunta.category) {
+    switch (question.category) {
       case "depression":
         _scoreDepression += score;
         break;
@@ -72,23 +72,23 @@ class _QuestionPageState extends State<QuestionPage> {
         break;
     }
 
-    print("📌 Respuesta: $respuesta");
+    print("📌 response: $response");
     print("🥇 Puntuación: $score");
     print("📈Puntaje depresión: $_scoreDepression");
     print("📈Puntaje ansiedad: $_scoreAnxiety");
     print("📈Puntaje estrés: $_scoreStress");
   }
 
-  int _getScore(String respuesta) {
-    if (respuesta == "Did not apply to me at all") {
+  int _getScore(String response) {
+    if (response == "Did not apply to me at all") {
       return 0; // No aplica, no suma puntos
-    } else if (respuesta ==
+    } else if (response ==
         "Applied to me to some degree, or some of the time") {
       return 1; // Aplica un poco, suma 1 punto
-    } else if (respuesta ==
+    } else if (response ==
         "Applied to me to a considerable degree or a good part of time") {
       return 2; // Aplica moderadamente, suma 2 puntos
-    } else if (respuesta == "Applied to me very much or most of the time") {
+    } else if (response == "Applied to me very much or most of the time") {
       return 3; // Aplica mucho, suma 3 puntos
     }
     return 0; // Valor por defecto si no coincide ninguna opción
@@ -142,7 +142,7 @@ class _QuestionPageState extends State<QuestionPage> {
     return;
   }
 
-// Método para avanzar a la siguiente pregunta
+// Método para avanzar a la siguiente question
   void _nextQuestion() {
     if (_selectedOption != null) {
       _saveResponse(_questions[_currentIndex], _selectedOption!);
@@ -153,7 +153,7 @@ class _QuestionPageState extends State<QuestionPage> {
         _selectedOption = null; // Reset opción seleccionada
       });
     } else {
-      // Última pregunta: guardamos resultados y mostramos botones
+      // Última question: guardamos resultados y mostramos botones
       _saveFinalScores().then((_) {
         print("✅ Resultados finales guardados en Firebase");
         print("📈Puntaje depresión: $_scoreDepression");
@@ -232,51 +232,55 @@ class _QuestionPageState extends State<QuestionPage> {
                           textAlign: TextAlign.center,
                         ),
                         SizedBox(height: 40),
-                        Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            ElevatedButton(
-                              onPressed: () {
-                                Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                    builder: (context) => RecommendationPage(
-                                      depressionScore: _scoreDepression,
-                                      anxietyScore: _scoreAnxiety,
-                                      stressScore: _scoreStress,
+                        SingleChildScrollView(
+                          scrollDirection: Axis.horizontal,
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              ElevatedButton(
+                                onPressed: () {
+                                  Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (context) => RecommendationPage(
+                                        depressionScore: _scoreDepression,
+                                        anxietyScore: _scoreAnxiety,
+                                        stressScore: _scoreStress,
+                                      ),
                                     ),
+                                  );
+                                },
+                                child: Text(
+                                  "View recommendations with static responses",
+                                  style: TextStyle(
+                                    fontSize: 15,
                                   ),
-                                );
-                              },
-                              child: Text(
-                                "View recommendations with static responses",
-                                style: TextStyle(
-                                  fontSize: 15,
                                 ),
                               ),
-                            ),
-                            SizedBox(width: 20), // espacio entre botones
-                            ElevatedButton(
-                              onPressed: () {
-                                Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                    builder: (context) => LLMRecommendationPage(
-                                      depressionScore: _scoreDepression,
-                                      anxietyScore: _scoreAnxiety,
-                                      stressScore: _scoreStress,
+                              SizedBox(width: 20), // espacio entre botones
+                              ElevatedButton(
+                                onPressed: () {
+                                  Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (context) =>
+                                          LLMRecommendationPage(
+                                        depressionScore: _scoreDepression,
+                                        anxietyScore: _scoreAnxiety,
+                                        stressScore: _scoreStress,
+                                      ),
                                     ),
+                                  );
+                                },
+                                child: Text(
+                                  "View recommendations with dynamic responses",
+                                  style: TextStyle(
+                                    fontSize: 15,
                                   ),
-                                );
-                              },
-                              child: Text(
-                                "View recommendations with dynamic responses",
-                                style: TextStyle(
-                                  fontSize: 15,
                                 ),
                               ),
-                            ),
-                          ],
+                            ],
+                          ),
                         ),
                         SizedBox(height: 30),
                         ElevatedButton(
@@ -308,16 +312,16 @@ class _QuestionPageState extends State<QuestionPage> {
                 : Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      // Widget BigCard que muestra la pregunta actual
+                      // Widget BigCard que muestra la question actual
                       Center(
                         child: BigCard(
-                            question: _questions[_currentIndex].pregunta),
+                            question: _questions[_currentIndex].question),
                       ),
 
                       SizedBox(height: 20),
 
-                      // Opciones con botones de radio
-                      ..._questions[_currentIndex].opciones.map((opcion) {
+                      // options con botones de radio
+                      ..._questions[_currentIndex].options.map((opcion) {
                         return Padding(
                           padding: const EdgeInsets.symmetric(vertical: 8.0),
                           child: Row(
@@ -338,12 +342,14 @@ class _QuestionPageState extends State<QuestionPage> {
                               ),
                               SizedBox(
                                   width: 12), // espacio entre radio y texto
-                              Text(
-                                opcion,
-                                style: TextStyle(
-                                  color:
-                                      Theme.of(context).colorScheme.onPrimary,
-                                  fontSize: 16,
+                              Flexible(
+                                child: Text(
+                                  opcion,
+                                  style: TextStyle(
+                                    color:
+                                        Theme.of(context).colorScheme.onPrimary,
+                                    fontSize: 16,
+                                  ),
                                 ),
                               ),
                             ],
@@ -374,12 +380,12 @@ class _QuestionPageState extends State<QuestionPage> {
 }
 
 class BigCard extends StatelessWidget {
-  final String question; // Pregunta: _questions[_currentIndex].pregunta
+  final String question; // question: _questions[_currentIndex].question
 
   const BigCard({
     //constructor
     Key? key,
-    required this.question, // Parámetro (pregunta) obligatorio
+    required this.question, // Parámetro (question) obligatorio
   }) : super(key: key);
 
   @override

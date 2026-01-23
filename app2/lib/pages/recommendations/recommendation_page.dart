@@ -14,33 +14,33 @@ class RecommendationPage extends StatelessWidget {
   // Respuesta según la puntuación del parámetro de depresión
   String getDepressionRecommendation() {
     if (depressionScore <= 7) {
-      return "Tu nivel de síntomas depresivos es bajo. Continúa con actividades que te generen bienestar emocional y mantén un estilo de vida saludable.";
+      return "Your level of depressive symptoms is low. Continue with activities that bring you emotional well-being, and maintain a healthy lifestyle.";
     } else if (depressionScore <= 14) {
-      return "Tu nivel de síntomas depresivos es moderado. Podría ser útil hablar con alguien de confianza o un profesional si sientes que estos síntomas afectan tu vida diaria.";
+      return "Your level of depressive symptoms is moderate. It might be helpful to talk to someone you trust or a professional if you feel these symptoms are affecting your life routine.";
     } else {
-      return "Tu nivel de síntomas depresivos es alto. Se recomienda buscar apoyo profesional y rodearte de personas que puedan brindarte apoyo emocional.";
+      return "Your level of depressive symptoms is high. It is recommended to seek professional support and surround yourself with people who can provide emotional support.";
     }
   }
 
   // Respuesta según la puntuación del parámetro de ansiedad
   String getAnxietyRecommendation() {
     if (anxietyScore <= 7) {
-      return "Tu nivel de ansiedad es bajo. Sigue manteniendo una buena gestión del estrés y busca momentos para relajarte.";
+      return "Your anxiety level is low. Continue to manage your stress well and find moments to relax.";
     } else if (anxietyScore <= 14) {
-      return "Tu nivel de ansiedad es moderado. Intenta practicar técnicas de relajación como la respiración profunda o la meditación.";
+      return "Your anxiety level is moderate. Try practicing relaxation techniques like deep breathing or meditation.";
     } else {
-      return "Tu nivel de ansiedad es alto. Sería recomendable buscar ayuda profesional para aprender estrategias de manejo del estrés y la ansiedad.";
+      return "Your anxiety level is high. It would be recommended to seek professional help to learn stress and anxiety management strategies.";
     }
   }
 
   // Respuesta según la puntuación del parámetro de estrés
   String getStressRecommendation() {
     if (stressScore <= 7) {
-      return "Tu nivel de estrés es bajo. Prueba con técnicas de relajación y respiración profunda que ayuden a mantener la calma.";
+      return "Your stress level is low. Try relaxation techniques and deep breathing that help maintain calm.";
     } else if (stressScore <= 14) {
-      return "Tu nivel de estrés es moderado. Integra pausas activas y breves sesiones de mindfulness en tu rutina diaria para aliviar la tensión.";
+      return "Your stress level is moderate. Integrate active pauses and brief mindfulness sessions into your daily routine to relieve tension.";
     } else {
-      return "Tu nivel de estrés es alto. Busca apoyo profesional y establece un hábito diario de autocuidado con meditación y descanso adecuado.";
+      return "Your stress level is high. Seek professional support and establish a daily self-care habit with meditation and adequate rest.";
     }
   }
 
@@ -84,7 +84,7 @@ class RecommendationPage extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
                 Text(
-                  "Resultados del cuestionario",
+                  "Questionnaire results",
                   style: TextStyle(
                       fontSize: 22,
                       fontWeight: FontWeight.bold,
@@ -93,7 +93,7 @@ class RecommendationPage extends StatelessWidget {
                 ),
                 SizedBox(height: 20),
                 Text(
-                  "Depresión:",
+                  "Depression:",
                   style: TextStyle(
                       fontSize: 20,
                       fontWeight: FontWeight.bold,
@@ -101,7 +101,7 @@ class RecommendationPage extends StatelessWidget {
                   textAlign: TextAlign.center,
                 ),
                 Text(
-                  "Tu depresión tiene una puntuación de: $depressionScore",
+                  "Your depression score is: $depressionScore",
                   style: TextStyle(
                       fontSize: 15,
                       color: Theme.of(context).colorScheme.primaryContainer),
@@ -116,7 +116,7 @@ class RecommendationPage extends StatelessWidget {
                 ),
                 SizedBox(height: 20),
                 Text(
-                  "Ansiedad:",
+                  "Anxiety:",
                   style: TextStyle(
                       fontSize: 20,
                       fontWeight: FontWeight.bold,
@@ -124,7 +124,7 @@ class RecommendationPage extends StatelessWidget {
                   textAlign: TextAlign.center,
                 ),
                 Text(
-                  "Tu ansiedad tiene una puntuación de: $anxietyScore",
+                  "Your anxiety score is: $anxietyScore",
                   style: TextStyle(
                       fontSize: 15,
                       color: Theme.of(context).colorScheme.primaryContainer),
@@ -139,7 +139,7 @@ class RecommendationPage extends StatelessWidget {
                 ),
                 SizedBox(height: 20),
                 Text(
-                  "Estrés:",
+                  "Stress:",
                   style: TextStyle(
                       fontSize: 20,
                       fontWeight: FontWeight.bold,
@@ -147,7 +147,7 @@ class RecommendationPage extends StatelessWidget {
                   textAlign: TextAlign.center,
                 ),
                 Text(
-                  "Tu estrés tiene una puntuación de: $stressScore",
+                  "Your stress score is: $stressScore",
                   style: TextStyle(
                       fontSize: 15,
                       color: Theme.of(context).colorScheme.primaryContainer),
@@ -170,7 +170,7 @@ class RecommendationPage extends StatelessWidget {
                         Colors.deepPurple.shade200.withOpacity(0.8),
                   ),
                   child: Text(
-                    "Volver",
+                    "Back",
                     style: TextStyle(
                       color: Theme.of(context).colorScheme.onPrimary,
                     ),

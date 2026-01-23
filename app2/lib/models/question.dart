@@ -1,18 +1,18 @@
 class Question {
-  final String pregunta;
-  final List<String> opciones;
+  final String question;
+  final List<String> options;
   final String category;
 
   Question({
-    required this.pregunta,
-    required this.opciones,
+    required this.question,
+    required this.options,
     required this.category,
   });
 
   // Convertir desde JSON (questions.json) => Map
   factory Question.fromJson(Map<String, dynamic> json) => Question(
-        pregunta: json["pregunta"] as String,
-        opciones: List<String>.from(json["opciones"]),
+        question: json["question"] as String,
+        options: List<String>.from(json["options"]),
         category: json["category"] as String, // <-- lee un String
       );
 }

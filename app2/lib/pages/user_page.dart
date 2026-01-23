@@ -58,7 +58,8 @@ class AlertButtom extends StatelessWidget {
           content: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Image.asset('images/privacity.png', height: 170, width: 170),
+              Image.asset('assets/images/privacity.png',
+                  height: 170, width: 170),
               const SizedBox(height: 8),
               // Envolvemos el texto en un Container para limitar el ancho
               Container(

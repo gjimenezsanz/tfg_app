@@ -45,7 +45,13 @@ class _MyHomePageState extends State<MyHomePage> {
       body: LayoutBuilder(
         //widgets que dependen del tamaño de la pantalla
         builder: (context, constraints) {
-          if (constraints.maxWidth < 450) {
+          final size = MediaQuery.sizeOf(context); //tamaño de la pantalla
+          final isLandscape = size.width >
+              size.height; //modo horizontal: el ancho es mayor que el alto
+          final useRail = size.shortestSide >= 600 &&
+              isLandscape; //si el lado más corto es >= 600 y está en horizontal
+
+          if (!useRail) {
             return Column(
               children: [
                 Expanded(child: mainArea),
@@ -142,26 +148,31 @@ class _MyHomePageState extends State<MyHomePage> {
           }
         },
       ),
-      floatingActionButton: Padding(
-        //boton flotante chat
-        padding: const EdgeInsets.all(25),
-        child: Column(
-          children: [
-            FloatingActionButton(
-              onPressed: () {
-                // Redirige a la página ChatPage usando Navigator
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => ChatPage()),
-                );
-              },
-              backgroundColor: Colors.cyan.shade700,
-              foregroundColor: colorScheme.onPrimary,
-              shape: const CircleBorder(),
-              tooltip: 'Chat with me!',
-              child: const Icon(Icons.sms_outlined),
-            ),
-          ],
+      floatingActionButtonLocation:
+          FloatingActionButtonLocation.endTop, //posición del botón flotante
+      floatingActionButton: SafeArea(
+        //evita que el botón choque con los bordes
+        child: Padding(
+          //boton flotante chat
+          padding: const EdgeInsets.only(top: 12, right: 20), //margen
+          child: Column(
+            children: [
+              FloatingActionButton(
+                onPressed: () {
+                  // Redirige a la página ChatPage usando Navigator
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => ChatPage()),
+                  );
+                },
+                backgroundColor: Colors.cyan.shade700,
+                foregroundColor: colorScheme.onPrimary,
+                shape: const CircleBorder(),
+                tooltip: 'Chat with me!',
+                child: const Icon(Icons.sms_outlined),
+              ),
+            ],
+          ),
         ),
       ),
     );
